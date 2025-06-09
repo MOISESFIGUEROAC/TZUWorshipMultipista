@@ -64,7 +64,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TZU Worship - Multipista</title>
+    <title>TZU Worship - Multipista con Forma de Onda</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
@@ -86,6 +86,7 @@
             --info-color: #FFA500;  
             --disabled-color: #e9ecef;
             --button-text-color: var(--text-color-light);
+            --waveform-cursor-color: #D9534F; /* Rojo para el cursor, igual que warn-color */
         }
 
         :root[data-theme="dark"] {
@@ -102,6 +103,7 @@
             --info-color: #FFAE42;
             --disabled-color: #2c2c2c;
             --button-text-color: var(--text-color-light);
+            --waveform-cursor-color: #E74C3C;
         }
 
         body {
@@ -255,8 +257,13 @@
             align-items: center;
             margin-bottom: 20px;
         }
-
-        .global-playback-controls { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+       
+        .global-playback-controls { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+        }
         #globalPlayPauseButton { 
             background-color: var(--accent-color); 
             color: var(--button-text-color); 
@@ -264,6 +271,8 @@
             padding: 12px 28px; 
             font-size: 1.1em; 
             min-width: 160px; text-align: center; 
+            align-self: flex-start;
+            margin-bottom: 10px;
         }
         #globalPlayPauseButton.playing { background-color: var(--warn-color); }
         #globalPlayPauseButton:hover {
@@ -273,11 +282,78 @@
              background-color: color-mix(in srgb, var(--warn-color) 90%, black);
         }
 
-        .scrubber-container { flex-grow: 1; display: flex; align-items: center; gap: 12px; }
-        #globalScrubber { width: 100%; height: 12px; -webkit-appearance: none; appearance: none; background: var(--disabled-color); border-radius: 6px; }
-        #globalScrubber::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        #globalScrubber::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; border: none; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        #globalTimeDisplay { font-size: 0.95em; color: var(--secondary-color); min-width: 100px; text-align: right; font-weight: 600; }
+        .waveform-scrubber-container {
+            width: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        #waveformCanvas {
+            width: 100%;
+            height: 80px; 
+            background-color: var(--surface-color); 
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #progressCursor {
+            position: absolute;
+            top: 1px; /* Ajustar para estar dentro del borde del canvas */
+            left: 0; 
+            width: 2px; 
+            height: calc(100% - 2px); /* Ajustar para estar dentro del borde del canvas */
+            background-color: var(--waveform-cursor-color); 
+            pointer-events: none; 
+            z-index: 1; 
+        }
+
+
+        #globalTimeDisplay { 
+            font-size: 0.9em; 
+            color: var(--secondary-color); 
+            min-width: 100px; 
+            text-align: right; 
+            font-weight: 600;
+            margin-top: 5px; 
+            align-self: flex-end; 
+        }
+        
+        /* Layout para pantallas más grandes */
+        @media (min-width: 769px) {
+            .global-playback-controls {
+                flex-direction: row;
+                align-items: center;
+                gap: 15px;
+            }
+            #globalPlayPauseButton {
+                margin-bottom: 0;
+                align-self: unset;
+            }
+            .waveform-scrubber-container {
+                flex-grow: 1;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+            #waveformCanvas {
+                flex-grow: 1;
+            }
+            #progressCursor { /* Asegurar que la altura sea la del canvas */
+                height: 80px; /* Coincidir con la altura del canvas */
+                top: 50%; /* Centrar verticalmente el cursor */
+                transform: translateY(-50%);
+            }
+            #globalTimeDisplay {
+                margin-top: 0;
+                align-self: center;
+            }
+        }
+
+
         .master-volume-control { display: flex; align-items: center; gap: 10px; margin-top:20px; }
         .master-volume-control label { font-size: 0.95em; font-weight: 600; }
         #masterVolumeSlider { flex-grow: 1; max-width: 280px;}
@@ -418,10 +494,11 @@
             h1 { font-size: 1.8em; }
             .header-controls { flex-direction: column-reverse; align-items: flex-start; gap: 10px;}
             #themeToggleButton { align-self: flex-end;}
-            .global-playback-controls { flex-direction: column; align-items: stretch; }
-            #globalPlayPauseButton { width: 100%; margin-bottom: 10px;}
-            .scrubber-container { width: 100%; }
-            #globalTimeDisplay { text-align: center; margin-top: 5px;}
+             /* Ya estaba en .global-playback-controls general */
+            /* .global-playback-controls { flex-direction: column; align-items: stretch; } */
+            /* #globalPlayPauseButton { width: 100%; margin-bottom: 10px;} */
+            /* .waveform-scrubber-container { width: 100%; } */ /* Ya es 100% por defecto */
+            #globalTimeDisplay { text-align: center; /* margin-top: 5px; <- Ajustado por el flex-direction column del contenedor */ }
             .master-volume-control label { display:none; }
             .master-volume-control { margin-top:10px; }
             #masterVolumeSlider { max-width: none;}
@@ -465,8 +542,9 @@
             <h2>Controles Globales</h2>
             <div class="global-playback-controls">
                 <button id="globalPlayPauseButton" class="paused">▶️ Play</button>
-                <div class="scrubber-container">
-                    <input type="range" id="globalScrubber" value="0" min="0" max="100" step="0.1" disabled>
+                <div class="waveform-scrubber-container">
+                    <canvas id="waveformCanvas"></canvas>
+                    <div id="progressCursor"></div>
                     <span id="globalTimeDisplay">00:00 / 00:00</span>
                 </div>
             </div>
@@ -480,13 +558,14 @@
             <h2>Gestión de Archivos y Exportación</h2>
             <div class="file-management"> 
                 <input type="file" id="fileInputGlobal" multiple accept=".mp3,.wav">
-                <button id="loadFilesButton">📁 Cargar Pistas</button>
+                <button id="loadFilesButton">📁 Cargar Stems Locales</button>
                 <span id="loadingMessage"></span>
             </div>
             <div class="export-controls">
                 <button id="exportMixButton" disabled>📤 Exportar Mezcla</button>
                 <select id="exportFormatSelect">
                     <option value="wav" selected>WAV</option>
+                    <option value="mp3" disabled>MP3 (Próximamente)</option>
                 </select>
                 <span id="exportMessage"></span>
             </div>
@@ -511,8 +590,8 @@
                     <div class="metronome-control-group">
                         <label for="clickSoundSelect">Sonido del Click</label>
                         <select id="clickSoundSelect">
-                            <option value="suave">Suave (Sine)</option>
                             <option value="madera_simulada" selected>Madera (Simulada)</option>
+                            <option value="suave">Suave (Sine)</option>
                             <option value="seco">Seco (Square)</option>
                         </select>
                     </div>
@@ -541,7 +620,7 @@
             const tracksContainer = document.getElementById('tracksContainer');
             const tracksContainerPlaceholder = document.getElementById('tracksContainerPlaceholder');
             const globalPlayPauseButton = document.getElementById('globalPlayPauseButton');
-            const globalScrubber = document.getElementById('globalScrubber');
+            // globalScrubber eliminado
             const globalTimeDisplay = document.getElementById('globalTimeDisplay');
             const masterVolumeSlider = document.getElementById('masterVolumeSlider');
             const loadFilesButton = document.getElementById('loadFilesButton');
@@ -566,6 +645,10 @@
             const loadingOverlay = document.getElementById('loadingOverlay');
             const loadingPercentage = document.getElementById('loadingPercentage');
 
+            // Nuevos elementos para la forma de onda
+            const waveformCanvas = document.getElementById('waveformCanvas');
+            const waveformCtx = waveformCanvas.getContext('2d');
+            const progressCursor = document.getElementById('progressCursor');
 
             let previousSoloedTrackIds = [];
             let isSoloButtonInRestoreMode = false;
@@ -582,6 +665,10 @@
             let isPlaying = false;
             let globalStartTime = 0, globalPauseOffset = 0, maxDuration = 0, animationFrameId = null;
             let nextTrackId = 0;
+
+            // Para la forma de onda
+            let mixedAudioBuffer = null; 
+            let isScrubbingWaveform = false;
 
             let metronome = {
                 isActive: false, isPlayingInternal: false, bpm: 120, 
@@ -618,6 +705,7 @@
                     applyTheme('dark');
                     localStorage.setItem('themePreference', 'dark');
                 }
+                drawWaveform(); // Redibujar forma de onda con nuevos colores
             }
 
             function loadThemePreference() {
@@ -721,7 +809,7 @@
                 newTrack.volumeSlider.addEventListener('input', (event) => setTrackVolume(newTrack.id, parseFloat(event.target.value)));
 
                 tracks.push(newTrack);
-                if (audioBuffer) updateMaxDurationAndScrubber();
+                if (audioBuffer) updateMaxDurationAndScrubber(); // Esto llamará a regenerateAndDrawWaveform
                 updateAllTrackVisualsAndVolumes();
                 return newTrack;
             }
@@ -752,6 +840,8 @@
                 if (!track) return;
                 track.isMuted = !track.isMuted;
                 updateAllTrackVisualsAndVolumes();
+                // Considerar si regenerar la forma de onda global con M/S. Por ahora, no.
+                // regenerateAndDrawWaveform(); 
                 saveSession();
             }
 
@@ -761,6 +851,8 @@
                 if (!track) return;
                 track.isSoloed = !track.isSoloed;
                 updateAllTrackVisualsAndVolumes();
+                // Considerar si regenerar la forma de onda global con M/S. Por ahora, no.
+                // regenerateAndDrawWaveform();
                 saveSession();
             }
 
@@ -796,6 +888,7 @@
                     isSoloButtonInRestoreMode = false;
                 }
                 updateAllTrackVisualsAndVolumes();
+                // regenerateAndDrawWaveform(); // Si M/S afectan la onda visual
                 saveSession();
             });
 
@@ -831,6 +924,7 @@
                     isMuteButtonInRestoreMode = false;
                 }
                 updateAllTrackVisualsAndVolumes();
+                // regenerateAndDrawWaveform(); // Si M/S afectan la onda visual
                 saveSession();
             });
 
@@ -838,7 +932,10 @@
             function setTrackVolume(trackId, volumeValue) {
                 if (!audioContext) initAudioContext(); const track = findTrackById(trackId);
                 if (!track) return; track.volume = volumeValue;
-                applyEffectiveVolume(track.id); saveSession();
+                applyEffectiveVolume(track.id); 
+                // Si el volumen afecta la forma de onda visual global
+                // if (mixedAudioBuffer) regenerateAndDrawWaveform(); 
+                saveSession();
             }
 
             function updateAllTrackVisualsAndVolumes() {
@@ -875,7 +972,6 @@
                 }
             }
 
-            // --- Device Detection ---
             function isMobileDevice() {
                 return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
@@ -889,10 +985,10 @@
                 const files = event.target.files; 
                 if (!files.length) return;
 
-                const MAX_TRACKS_MOBILE = 5; // Límite para móviles
+                const MAX_TRACKS_MOBILE = 5; 
                 if (isMobileDevice() && (tracks.length + files.length) > MAX_TRACKS_MOBILE) {
                     const userConfirmed = confirm(
-                        `Advertencia: Estás en un dispositivo móvil e intentas cargar ${files.length} pistas (total actual + nuevas: ${tracks.length + files.length}). ` +
+                        `Advertencia: Estás en un dispositivo móvil e intentas cargar ${files.length} pistas adicionales (total actual + nuevas: ${tracks.length + files.length}). ` +
                         `Esto podría superar la memoria disponible y causar que la página se reinicie. ` +
                         `Se recomienda un máximo de ${MAX_TRACKS_MOBILE} pistas en total en móviles. ¿Deseas continuar bajo tu propio riesgo?`
                     );
@@ -940,7 +1036,10 @@
                     tracksContainerPlaceholder.style.display = 'none';
                     exportMixButton.disabled = false;
                 }
-                saveSession(); fileInputGlobal.value = null;
+                // updateMaxDurationAndScrubber llamará a regenerateAndDrawWaveform
+                updateMaxDurationAndScrubber(); 
+                saveSession(); 
+                fileInputGlobal.value = null;
             }
 
             masterVolumeSlider.addEventListener('input', (event) => {
@@ -980,58 +1079,64 @@
                 if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
                 updateUI();
             }
-            globalScrubber.addEventListener('input', handleScrub);
-            globalScrubber.addEventListener('change', () => saveSession());
+            // globalScrubber listeners eliminados, reemplazados por los del canvas
             
-            function handleScrub(event) {
-                if (!audioContext) return; 
-                const seekTime = parseFloat(event.target.value);
-                const wasPlaying = isPlaying; 
-            
-                if (wasPlaying) {
-                    pauseAll(); 
-                }
-                
-                globalPauseOffset = seekTime; 
-                if (!wasPlaying) {
-                     globalStartTime = audioContext.currentTime - globalPauseOffset;
-                }
-
-                updateUI(); 
-            
-                if (wasPlaying) {
-                    playAll(); 
-                } else if (metronome.isActive) {
-                    stopMetronomePlayback();
-                }
+            function handleScrub(event) { // Esta función ahora se llama handleWaveformScrub
+                // ... (lógica movida a handleWaveformScrub) ...
             }
 
             function updateUI() {
-                if (!audioContext) { if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = null; return; }
+                if (!audioContext) { 
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId); 
+                    animationFrameId = null; 
+                    progressCursor.style.left = '0%';
+                    return; 
+                }
                 let currentElapsedTime = isPlaying ? audioContext.currentTime - globalStartTime : globalPauseOffset;
-                currentElapsedTime = Math.max(0, currentElapsedTime);
+                currentElapsedTime = Math.max(0, Math.min(currentElapsedTime, maxDuration)); 
+
                 if (maxDuration > 0) {
-                    globalScrubber.value = currentElapsedTime;
                     globalTimeDisplay.textContent = `${formatTime(currentElapsedTime)} / ${formatTime(maxDuration)}`;
-                } else { globalTimeDisplay.textContent = `00:00 / 00:00`; globalScrubber.value = 0; }
+                } else {
+                    globalTimeDisplay.textContent = `00:00 / 00:00`;
+                }
+
+                if (maxDuration > 0 && waveformCanvas.width > 0) {
+                    const progressPercent = (currentElapsedTime / maxDuration) * 100;
+                    progressCursor.style.left = `${Math.min(100, Math.max(0, progressPercent))}%`;
+                } else {
+                    progressCursor.style.left = '0%';
+                }
+
                 tracks.forEach(track => {
                     if (track.audioBuffer && track.duration > 0) {
                         const progress = Math.min(currentElapsedTime / track.duration, 1);
                         track.progressBarFill.style.width = `${Math.min(100, Math.max(0, progress * 100))}%`;
-                    } else { track.progressBarFill.style.width = `0%`; }
+                    } else { 
+                        track.progressBarFill.style.width = `0%`; 
+                    }
                 });
+
                 if (isPlaying && maxDuration > 0 && currentElapsedTime >= maxDuration) {
-                    pauseAll(); globalPauseOffset = maxDuration; globalScrubber.value = maxDuration;
+                    pauseAll(); 
+                    globalPauseOffset = maxDuration; 
+                    progressCursor.style.left = '100%';
                 }
                 if (isPlaying) animationFrameId = requestAnimationFrame(updateUI);
             }
-            function updateMaxDurationAndScrubber() {
+            
+            async function updateMaxDurationAndScrubber() { // Renombrado y modificado
                 maxDuration = tracks.reduce((max, track) => (track.audioBuffer && track.duration) ? Math.max(max, track.duration) : max, 0);
-                if (maxDuration > 0) { globalScrubber.max = maxDuration; globalScrubber.disabled = false; }
-                else { globalScrubber.max = 100; globalScrubber.disabled = true; globalScrubber.value = 0; }
+                if (maxDuration > 0) {
+                    await regenerateAndDrawWaveform(); // Esperar a que la forma de onda se genere
+                } else {
+                    mixedAudioBuffer = null;
+                    drawWaveform(); // Limpiar canvas
+                }
                 globalPauseOffset = Math.min(globalPauseOffset, maxDuration);
                 updateUI();
             }
+
             function formatTime(seconds) { const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60); return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`; }
 
             metronomeToggleButton.addEventListener('click', () => {
@@ -1085,12 +1190,12 @@
                         saveSession();
                     } else {
                         timeSignatureInput.classList.add('invalid');
-                        console.warn("Compás inválido. Formato: N/D (Num: 1-16, Den: 2,4,8,16). Ej: 4/4, 7/8.");
+                        console.warn("Compás inválido. Se restaurará al anterior o 4/4.");
                         timeSignatureInput.value = metronome.timeSignature.join('/'); 
                     }
                 } else {
                     timeSignatureInput.classList.add('invalid');
-                     console.warn("Compás inválido. Formato: N/D. Ej: 4/4, 7/8.");
+                     console.warn("Compás inválido. Se restaurará al anterior o 4/4.");
                     timeSignatureInput.value = metronome.timeSignature.join('/');
                 }
             });
@@ -1122,12 +1227,11 @@
                     if (metronome.currentSchedulerBeat === 0) {
                         accentType = 'primary';
                     } else {
-                        if (metronome.beatValue === 8) { // Énfasis en subdivisiones ternarias para X/8
+                        if (metronome.beatValue === 8) { 
                             if (metronome.beatsPerBar === 6 && metronome.currentSchedulerBeat === 3) accentType = 'secondary';
                             else if (metronome.beatsPerBar === 9 && (metronome.currentSchedulerBeat === 3 || metronome.currentSchedulerBeat === 6)) accentType = 'secondary';
                             else if (metronome.beatsPerBar === 12 && (metronome.currentSchedulerBeat === 3 || metronome.currentSchedulerBeat === 6 || metronome.currentSchedulerBeat === 9)) accentType = 'secondary';
                         }
-                        // Considerar acento secundario en el medio para 4/4
                         else if (metronome.beatsPerBar === 4 && metronome.beatValue === 4 && metronome.currentSchedulerBeat === 2) {
                            accentType = 'secondary';
                         }
@@ -1257,6 +1361,162 @@
                 metronome.schedulerTimerId = null;
                 metronome.isPlayingInternal = false;
             }
+
+            // --- FUNCIONES DE FORMA DE ONDA ---
+            async function generateMixedAudioBuffer() {
+                if (!tracks.length || maxDuration === 0) {
+                    mixedAudioBuffer = null;
+                    return;
+                }
+                if (!audioContext) initAudioContext();
+
+                const targetSampleRate = audioContext.sampleRate;
+                const numberOfChannels = audioContext.destination.channelCount > 0 ? audioContext.destination.channelCount : 2;
+                const offlineCtx = new OfflineAudioContext(numberOfChannels, Math.ceil(targetSampleRate * maxDuration), targetSampleRate);
+                const offlineMasterGain = offlineCtx.createGain();
+                offlineMasterGain.gain.value = 1.0; 
+                offlineMasterGain.connect(offlineCtx.destination);
+
+                for (const track of tracks) {
+                    if (track.audioBuffer) {
+                        const source = offlineCtx.createBufferSource();
+                        source.buffer = track.audioBuffer;
+                        const trackGain = offlineCtx.createGain();
+                        trackGain.gain.value = track.volume; // Mezcla para forma de onda usa solo volumen de pista
+                        source.connect(trackGain);
+                        trackGain.connect(offlineMasterGain);
+                        source.start(0);
+                    }
+                }
+                try {
+                    mixedAudioBuffer = await offlineCtx.startRendering();
+                } catch (err) {
+                    console.error("Error generando buffer de mezcla para forma de onda:", err);
+                    mixedAudioBuffer = null;
+                }
+            }
+
+            function drawWaveform() {
+                if (!waveformCtx) return; // Asegurar que el contexto del canvas existe
+                
+                const width = waveformCanvas.width;
+                const height = waveformCanvas.height;
+                waveformCtx.clearRect(0, 0, width, height);
+
+                // Obtener colores de las variables CSS
+                const waveColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+                const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--surface-color').trim(); // Fondo del canvas
+                // const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim(); // Borde del canvas
+
+                // Dibujar fondo (opcional, si el canvas CSS no lo cubre)
+                // waveformCtx.fillStyle = bgColor;
+                // waveformCtx.fillRect(0, 0, width, height);
+
+                if (!mixedAudioBuffer) {
+                    // Podrías dibujar una línea central o nada si no hay buffer
+                    waveformCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+                    waveformCtx.beginPath();
+                    waveformCtx.moveTo(0, height / 2);
+                    waveformCtx.lineTo(width, height / 2);
+                    waveformCtx.stroke();
+                    return;
+                }
+                
+                waveformCtx.lineWidth = 1.5; 
+                waveformCtx.strokeStyle = waveColor;
+                waveformCtx.beginPath();
+
+                const data = mixedAudioBuffer.getChannelData(0); 
+                const step = Math.ceil(data.length / width);
+                const amp = height / 2;
+
+                for (let i = 0; i < width; i++) {
+                    let min = 1.0;
+                    let max = -1.0;
+                    for (let j = 0; j < step; j++) {
+                        const datum = data[(i * step) + j];
+                        if (datum === undefined) continue; // Evitar errores si data.length no es múltiplo perfecto
+                        if (datum < min) min = datum;
+                        if (datum > max) max = datum;
+                    }
+                    waveformCtx.moveTo(i + 0.5, (1 + min) * amp); // +0.5 para líneas más nítidas
+                    waveformCtx.lineTo(i + 0.5, (1 + max) * amp);
+                }
+                waveformCtx.stroke();
+            }
+
+            async function regenerateAndDrawWaveform() {
+                if (tracks.length > 0 && maxDuration > 0) {
+                    const كان_يصدر = exportMixButton.disabled; // Guardar estado
+                    exportMixButton.disabled = true; 
+                    await generateMixedAudioBuffer();
+                    drawWaveform();
+                    exportMixButton.disabled = كان_يصدر; // Restaurar estado
+                } else {
+                    mixedAudioBuffer = null; 
+                    drawWaveform(); 
+                }
+            }
+
+            waveformCanvas.addEventListener('mousedown', (event) => {
+                if (maxDuration === 0 || !mixedAudioBuffer) return;
+                isScrubbingWaveform = true;
+                handleWaveformScrub(event);
+            });
+            document.addEventListener('mousemove', (event) => {
+                if (!isScrubbingWaveform || maxDuration === 0 || !mixedAudioBuffer) return;
+                handleWaveformScrub(event);
+            });
+            document.addEventListener('mouseup', () => {
+                if (isScrubbingWaveform) {
+                    isScrubbingWaveform = false;
+                    saveSession(); 
+                }
+            });
+            waveformCanvas.addEventListener('touchstart', (event) => {
+                if (maxDuration === 0 || !mixedAudioBuffer) return;
+                isScrubbingWaveform = true;
+                handleWaveformScrub(event.touches[0]);
+            }, { passive: false }); // passive: false para permitir preventDefault
+            document.addEventListener('touchmove', (event) => {
+                 if (!isScrubbingWaveform || maxDuration === 0 || !mixedAudioBuffer) return;
+                 event.preventDefault(); 
+                 handleWaveformScrub(event.touches[0]);
+            }, { passive: false });
+            document.addEventListener('touchend', () => {
+                if (isScrubbingWaveform) {
+                    isScrubbingWaveform = false;
+                    saveSession();
+                }
+            });
+
+            function handleWaveformScrub(event) {
+                if (!audioContext || maxDuration === 0) return;
+                const rect = waveformCanvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const progressRatio = Math.max(0, Math.min(1, x / rect.width));
+                const seekTime = progressRatio * maxDuration;
+
+                const wasPlaying = isPlaying;
+                if (wasPlaying) {
+                    pauseAll();
+                }
+                
+                globalPauseOffset = seekTime;
+                if (!wasPlaying) {
+                     globalStartTime = audioContext.currentTime - globalPauseOffset;
+                }
+                
+                updateUI(); 
+
+                if (wasPlaying) {
+                    playAll();
+                } else if (metronome.isActive) {
+                    stopMetronomePlayback();
+                }
+            }
+            // --- FIN FUNCIONES DE FORMA DE ONDA ---
+
 
             exportMixButton.addEventListener('click', async () => {
                 if (!tracks.length || maxDuration === 0) {
@@ -1395,7 +1655,7 @@
             
             function getSessionDataForSave() {
                  return {
-                    version: "1.3.13-mobile-warning-metronome-daw", 
+                    version: "1.3.14-waveform-scrubber", 
                     tracks: tracks.map(t => ({ 
                         volume: t.volume, isMuted: t.isMuted, isSoloed: t.isSoloed,
                         loadedFileName: t.loadedFileName, 
@@ -1410,7 +1670,7 @@
                         volume: metronome.volume 
                     },
                     masterVolume: parseFloat(masterVolumeSlider.value),
-                    globalScrubberValue: parseFloat(globalScrubber.value) || 0
+                    globalScrubberValue: parseFloat(globalPauseOffset) || 0 // Guardar globalPauseOffset
                 };
             }
 
@@ -1428,7 +1688,7 @@
                 previousMutedTrackIds = [];
             }
             
-            const LS_KEY = 'multipistaAdvancedSession_v1.3.13'; 
+            const LS_KEY = 'multipistaAdvancedSession_v1.3.14'; 
             function saveSession() {
                 if (typeof localStorage === 'undefined') return; const sessionData = getSessionDataForSave();
                 try { localStorage.setItem(LS_KEY, JSON.stringify(sessionData)); }
@@ -1457,6 +1717,8 @@
                         tempoInput.value = metronome.bpm;
                         clickSoundSelect.value = metronome.soundType;
                         metronomeVolumeSlider.value = metronome.volume;
+                        // Dibujar forma de onda vacía si no hay sesión
+                        await regenerateAndDrawWaveform(); 
                     }
                 } catch (e) { 
                     console.warn("No se pudo cargar la sesión desde LS:", e); 
@@ -1470,6 +1732,7 @@
                     tempoInput.value = metronome.bpm;
                     clickSoundSelect.value = metronome.soundType;
                     metronomeVolumeSlider.value = metronome.volume;
+                    await regenerateAndDrawWaveform(); // Dibujar forma de onda vacía en error
                 }
             }
 
@@ -1575,20 +1838,23 @@
 
                 masterVolumeSlider.value = data.masterVolume || 0.8;
                 if (masterGainNode && audioContext) masterGainNode.gain.setValueAtTime(parseFloat(masterVolumeSlider.value), audioContext.currentTime);
+                
+                // Restaurar globalPauseOffset ANTES de llamar a updateMaxDurationAndScrubber
                 globalPauseOffset = data.globalScrubberValue || 0;
 
                 updateAllTrackVisualsAndVolumes();
-                updateMaxDurationAndScrubber();
-                updateUI();
+                await updateMaxDurationAndScrubber(); // Hacerlo async y esperar
+                updateUI(); // Asegurar que la UI (incluido el cursor) se actualice después de todo
             }
 
             (async () => {
-                // No se llama a loadSession() para que empiece limpio por defecto
+                // Comentado para que no cargue sesión al inicio por defecto
                 // await loadSession(); 
 
                 if (tracks.length === 0) {
                     tracksContainerPlaceholder.style.display = 'block';
                     exportMixButton.disabled = true;
+                    progressCursor.style.left = '0%';
                 }
                 
                 const initialTimeSigParts = timeSignatureInput.value.trim().split('/');
@@ -1604,6 +1870,26 @@
                 metronome.bpm = parseInt(tempoInput.value);
                 metronome.soundType = clickSoundSelect.value; 
                 metronome.volume = parseFloat(metronomeVolumeSlider.value);
+
+                waveformCanvas.width = waveformCanvas.offsetWidth || 600; // Fallback si offsetWidth es 0
+                waveformCanvas.height = 80; 
+                waveformCanvas.style.height = '80px'; 
+                progressCursor.style.height = `${waveformCanvas.height}px`;
+
+                window.addEventListener('resize', () => { 
+                    if (waveformCanvas.offsetWidth > 0) { // Solo redimensionar si es visible
+                        waveformCanvas.width = waveformCanvas.offsetWidth;
+                    }
+                    // waveformCanvas.height = 80; // Mantener altura fija
+                    drawWaveform();
+                    updateUI(); 
+                });
+
+                if (maxDuration > 0) {
+                    await regenerateAndDrawWaveform();
+                } else {
+                    drawWaveform(); 
+                }
 
                 resetGlobalToggleButtonsToDefaults();
                 updateUI();
