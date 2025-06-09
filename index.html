@@ -514,9 +514,9 @@
                     <div class="metronome-control-group">
                         <label for="clickSoundSelect">Sonido del Click</label>
                         <select id="clickSoundSelect">
-                            <option value="suave" selected>Suave (Sine)</option>
+                            <option value="madera_simulada" selected>Madera (Simulada)</option>
+                            <option value="suave">Suave (Sine)</option>
                             <option value="seco">Seco (Square)</option>
-                            <option value="madera_simulada">Madera (Simulada)</option>
                         </select>
                     </div>
                     <div class="metronome-control-group">
@@ -589,12 +589,13 @@
             let metronome = {
                 isActive: false, isPlayingInternal: false, bpm: 120, 
                 timeSignature: [4, 4], 
-                soundType: 'suave', volume: 0.7, schedulerTimerId: null, nextNoteTime: 0.0,
+                soundType: 'madera_simulada', // Sonido por defecto cambiado
+                volume: 0.7, schedulerTimerId: null, nextNoteTime: 0.0,
                 currentBeatInBar: 0, lookahead: 25.0, scheduleAheadTime: 0.1, gainNode: null,
                 clickSounds: {
+                    madera_simulada: { freq1: 2500, freq2: 2000, type: 'triangle', decay: 0.02, noiseDuration: 0.015, noiseGain: 0.2 },
                     suave: { freq1: 880, freq2: 660, type: 'sine', decay: 0.05 },
-                    seco: { freq1: 1500, freq2: 1000, type: 'square', decay: 0.03 },
-                    madera_simulada: { freq1: 2500, freq2: 2000, type: 'triangle', decay: 0.02, noiseDuration: 0.015, noiseGain: 0.2 }
+                    seco: { freq1: 1500, freq2: 1000, type: 'square', decay: 0.03 }
                 }
             };
 
@@ -927,12 +928,13 @@
             function playAll() {
                 if (isPlaying || !tracks.some(t => t.audioBuffer)) return;
                 const currentTime = audioContext.currentTime;
-                if (globalPauseOffset >= maxDuration && maxDuration > 0) globalPauseOffset = 0;
+                if (globalPauseOffset >= maxDuration && maxDuration > 0) globalPauseOffset = 0; // Reset al inicio si estaba al final
+                
                 tracks.forEach(track => {
                     if (track.audioBuffer && track.gainNode) {
                         track.sourceNode = audioContext.createBufferSource(); track.sourceNode.buffer = track.audioBuffer;
                         track.sourceNode.connect(track.gainNode); let trackOffset = globalPauseOffset;
-                        if (trackOffset >= track.duration && track.duration > 0) return;
+                        if (trackOffset >= track.duration && track.duration > 0) return; // No iniciar si el offset supera la duración
                         track.sourceNode.start(currentTime, trackOffset);
                     }
                 });
@@ -956,18 +958,37 @@
             }
             globalScrubber.addEventListener('input', handleScrub);
             globalScrubber.addEventListener('change', () => saveSession());
+            
             function handleScrub(event) {
-                if (!audioContext) return; const seekTime = parseFloat(event.target.value);
-                if (isPlaying) { pauseAll(); globalPauseOffset = seekTime; playAll(); }
-                else { 
-                    globalPauseOffset = seekTime; 
-                    globalStartTime = (audioContext ? audioContext.currentTime : 0) - globalPauseOffset; 
-                    if (metronome.isActive && !isPlaying) { 
-                        stopMetronomePlayback();
-                    }
-                    updateUI(); 
+                if (!audioContext) return; 
+                const seekTime = parseFloat(event.target.value);
+                const wasPlaying = isPlaying; // Guardar estado de reproducción
+            
+                if (wasPlaying) {
+                    pauseAll(); // Pausar todo, esto actualiza globalPauseOffset
+                }
+                
+                globalPauseOffset = seekTime; // Establecer el nuevo offset
+                // globalStartTime se recalculará si se reanuda el play
+                // Si estaba pausado, globalStartTime ya está basado en el último currentTime - globalPauseOffset
+                if (!wasPlaying) {
+                     globalStartTime = audioContext.currentTime - globalPauseOffset;
+                }
+
+                updateUI(); // Actualizar la UI inmediatamente para reflejar el scrub
+            
+                if (wasPlaying) {
+                    playAll(); // Reanudar la reproducción desde la nueva posición
+                } else if (metronome.isActive) {
+                    // Si estaba pausado y el metrónomo activo, necesitamos reiniciar el metrónomo
+                    // para que refleje el nuevo tiempo en el próximo play.
+                    // No es necesario llamar a startMetronomePlayback aquí,
+                    // se llamará cuando el usuario presione play.
+                    // stopMetronomePlayback asegura que no haya schedulers viejos.
+                    stopMetronomePlayback();
                 }
             }
+
             function updateUI() {
                 if (!audioContext) { if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = null; return; }
                 let currentElapsedTime = isPlaying ? audioContext.currentTime - globalStartTime : globalPauseOffset;
@@ -1011,23 +1032,29 @@
                 }
                 saveSession();
             });
-            tempoInput.addEventListener('input', () => {
+
+            tempoInput.addEventListener('change', () => { // Cambiado a 'change'
                 let newTempo = parseInt(tempoInput.value); 
-                if (isNaN(newTempo) || newTempo < 20) newTempo = 20;
-                if (newTempo > 300) newTempo = 300;
+                if (isNaN(newTempo) || newTempo < 20) {
+                    newTempo = 20;
+                    tempoInput.value = newTempo; // Corregir en UI
+                }
+                if (newTempo > 300) {
+                    newTempo = 300;
+                    tempoInput.value = newTempo; // Corregir en UI
+                }
                 metronome.bpm = newTempo; 
-                tempoInput.value = newTempo; 
                 if (metronome.isActive && isPlaying) { 
                     stopMetronomePlayback(); 
                     startMetronomePlayback(); 
                 }
-                clearTimeout(metronome.saveTempoTimeout); 
-                metronome.saveTempoTimeout = setTimeout(saveSession, 500);
+                saveSession(); // Guardar sesión en 'change'
             });
+            // Quitar el listener de 'input' para tempoInput si existía
             
             timeSignatureInput.addEventListener('change', () => {
                 const parts = timeSignatureInput.value.trim().split('/');
-                timeSignatureInput.classList.remove('invalid'); // Resetear validación visual
+                timeSignatureInput.classList.remove('invalid'); 
                 if (parts.length === 2) {
                     const num = parseInt(parts[0]);
                     const den = parseInt(parts[1]);
@@ -1040,14 +1067,13 @@
                         saveSession();
                     } else {
                         timeSignatureInput.classList.add('invalid');
-                        console.warn("Compás inválido. Formato: N/D (Num: 1-16, Den: 2,4,8,16). Ej: 4/4, 7/8. Se usará 4/4.");
-                        metronome.timeSignature = [4,4]; 
-                        timeSignatureInput.value = metronome.timeSignature.join('/'); // Restaurar valor válido o predeterminado
+                        console.warn("Compás inválido. Formato: N/D (Num: 1-16, Den: 2,4,8,16). Ej: 4/4, 7/8.");
+                        // Restaurar al valor anterior o a un default si es la primera vez que se pone mal
+                        timeSignatureInput.value = metronome.timeSignature.join('/'); 
                     }
                 } else {
                     timeSignatureInput.classList.add('invalid');
-                    console.warn("Compás inválido. Formato: N/D. Ej: 4/4, 7/8. Se usará 4/4.");
-                    metronome.timeSignature = [4,4];
+                    console.warn("Compás inválido. Formato: N/D. Ej: 4/4, 7/8.");
                     timeSignatureInput.value = metronome.timeSignature.join('/');
                 }
             });
@@ -1065,6 +1091,7 @@
             function metronomeScheduler() {
                 if (!audioContext || !metronome.isActive || !isPlaying) return;
                 while (metronome.nextNoteTime < audioContext.currentTime + metronome.scheduleAheadTime) {
+                    // El primer beat del compás es el acentuado.
                     playMetronomeClick(metronome.nextNoteTime, audioContext, metronome.gainNode, metronome.currentBeatInBar === 0);
                     advanceMetronomeNote();
                 }
@@ -1075,7 +1102,10 @@
 
             function advanceMetronomeNote() {
                 const beatsPerBar = metronome.timeSignature[0];
-                const secondsPerBeat = 60.0 / metronome.bpm;
+                // Asumimos que el BPM siempre se refiere a la negra (quarter note)
+                // Si el denominador es 8 (corchea), un "beat del metrónomo" (negra) son dos corcheas.
+                // Esta lógica actual hace que el BPM siempre sea de negras.
+                const secondsPerBeat = 60.0 / metronome.bpm; 
                 
                 metronome.nextNoteTime += secondsPerBeat;
                 metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % beatsPerBar;
@@ -1124,30 +1154,30 @@
                 const currentCtx = offlineCtx || audioContext;
                 if (!metronome.isActive || !currentCtx) return;
             
-                if (!offlineCtx) {
+                if (!offlineCtx) { // Lógica para reproducción en tiempo real
                     if (metronome.isPlayingInternal) stopMetronomePlayback(); 
                     metronome.isPlayingInternal = true;
             
                     const secondsPerBeat = 60.0 / metronome.bpm;
-                    const elapsedTimeSinceGlobalStart = (currentCtx.currentTime - globalStartTime);
-                    const currentPlayheadTime = Math.max(0, elapsedTimeSinceGlobalStart); // Asegura que no sea negativo
-                    const beatsElapsed = currentPlayheadTime / secondsPerBeat;
+                    // Tiempo transcurrido desde el inicio global de reproducción (globalStartTime)
+                    // o desde el punto de pausa (globalPauseOffset) si no está sonando.
+                    const elapsedTime = isPlaying ? (currentCtx.currentTime - globalStartTime) : globalPauseOffset;
+                    const currentPlayheadTime = Math.max(0, elapsedTime);
                     
+                    const beatsElapsed = currentPlayheadTime / secondsPerBeat;
                     metronome.currentBeatInBar = Math.floor(beatsElapsed) % metronome.timeSignature[0];
                     
-                    // Calcula el índice del próximo beat. Si estamos exactamente en un beat, será ese mismo beat.
-                    // El -0.0001 es un pequeño epsilon para manejar problemas de precisión de punto flotante.
                     const nextBeatIndex = Math.ceil(beatsElapsed - 0.0001); 
-                    metronome.nextNoteTime = globalStartTime + (nextBeatIndex * secondsPerBeat);
+                    // Si está sonando, el tiempo base es globalStartTime. Si está pausado, es currentTime - globalPauseOffset
+                    const baseTimeToCalcNextNote = isPlaying ? globalStartTime : currentCtx.currentTime - globalPauseOffset;
+                    metronome.nextNoteTime = baseTimeToCalcNextNote + (nextBeatIndex * secondsPerBeat);
             
-                    // Ajuste para asegurar que nextNoteTime no esté en el pasado si globalStartTime es muy reciente
-                    // o si hay un pequeño desfase por el cálculo.
                     while (metronome.nextNoteTime < currentCtx.currentTime - 0.001) { 
                         metronome.nextNoteTime += secondsPerBeat;
                         metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % metronome.timeSignature[0];
                     }
                     metronomeScheduler();
-                } else { 
+                } else { // Lógica para exportación offline
                     let scheduledTime = 0;
                     let currentBeatInBarOffline = 0;
                     const beatsPerBarOffline = metronome.timeSignature[0];
@@ -1309,7 +1339,7 @@
             
             function getSessionDataForSave() {
                  return {
-                    version: "1.3.11-no-initial-load",
+                    version: "1.3.11-metronome-final-fix",
                     tracks: tracks.map(t => ({ 
                         volume: t.volume, isMuted: t.isMuted, isSoloed: t.isSoloed,
                         loadedFileName: t.loadedFileName, 
@@ -1342,15 +1372,13 @@
                 previousMutedTrackIds = [];
             }
             
-            const LS_KEY = 'multipistaAdvancedSession_v1.3.11'; // Actualizar versión para que usuarios anteriores no carguen una sesión potencialmente incompatible
+            const LS_KEY = 'multipistaAdvancedSession_v1.3.11';
             function saveSession() {
                 if (typeof localStorage === 'undefined') return; const sessionData = getSessionDataForSave();
                 try { localStorage.setItem(LS_KEY, JSON.stringify(sessionData)); }
                 catch (e) { console.warn("No se pudo guardar la sesión en LS:", e); }
             }
             
-            // La función loadSession() todavía existe por si en el futuro quieres un botón "Cargar última sesión"
-            // pero no se llamará automáticamente al inicio.
             async function loadSession() {
                 if (typeof localStorage === 'undefined') return;
                 try {
@@ -1364,7 +1392,6 @@
                          setTimeout(() => loadingMessage.textContent = "", 6000);
                     } else {
                         console.log("No hay sesión guardada para cargar.");
-                        // Si no hay sesión, asegurar que los valores por defecto del metrónomo estén bien
                         timeSignatureInput.value = metronome.timeSignature.join('/');
                         tempoInput.value = metronome.bpm;
                         clickSoundSelect.value = metronome.soundType;
@@ -1374,7 +1401,7 @@
             }
 
 
-            async function applyLoadedData(data) { // Se usa si se carga una sesión (ej. con un botón futuro o si se descomenta loadSession())
+            async function applyLoadedData(data) { 
                 initAudioContext();
                 tracksContainer.innerHTML = ''; tracks = []; nextTrackId = 0; maxDuration = 0;
                 tracksContainerPlaceholder.style.display = 'block';
@@ -1442,7 +1469,7 @@
                     }
 
 
-                    clickSoundSelect.value = data.metronome.soundType || "suave"; 
+                    clickSoundSelect.value = data.metronome.soundType || "madera_simulada"; // Actualizado default
                     metronome.soundType = clickSoundSelect.value;
                     metronomeVolumeSlider.value = data.metronome.volume !== undefined ? data.metronome.volume : 0.7; 
                     metronome.volume = parseFloat(metronomeVolumeSlider.value);
@@ -1477,17 +1504,13 @@
             }
 
             (async () => {
-                // NO llamamos a loadSession() aquí para que empiece limpio
-                // await loadSession(); 
-
-                // Asegurar estado inicial si no se carga sesión
+                // No se llama a loadSession() para que empiece limpio
                 if (tracks.length === 0) {
                     tracksContainerPlaceholder.style.display = 'block';
                     exportMixButton.disabled = true;
                 }
-                // Establecer valores por defecto del metrónomo si no se carga una sesión
-                // Esto ya se hace en la declaración de `metronome` y los valores `value` del HTML.
-                // Solo necesitamos asegurar que `metronome.timeSignature` se derive del input inicial.
+                
+                // Configurar valores iniciales del metrónomo desde el HTML/JS defaults
                 const initialTimeSignatureParts = timeSignatureInput.value.trim().split('/');
                 if (initialTimeSignatureParts.length === 2) {
                     const num = parseInt(initialTimeSignatureParts[0]);
@@ -1495,7 +1518,10 @@
                     if (!isNaN(num) && !isNaN(den) && num > 0 && den > 0) {
                         metronome.timeSignature = [num, den];
                     }
-                } // Sino, se queda con el [4,4] por defecto de la variable.
+                } // Sino, usa [4,4] de la variable metronome
+                metronome.bpm = parseInt(tempoInput.value);
+                metronome.soundType = clickSoundSelect.value; // Asegurar que coincida con el HTML
+                metronome.volume = parseFloat(metronomeVolumeSlider.value);
 
 
                 resetGlobalToggleButtonsToDefaults();
