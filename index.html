@@ -231,13 +231,18 @@
 
 
         input[type="range"] { accent-color: var(--primary-color); cursor: pointer; }
-        select, input[type="number"] {
+        select, input[type="text"], input[type="number"] { 
             padding: 10px; border: 1px solid var(--border-color);
             border-radius: 6px; font-size: 0.95em; box-sizing: border-box;
             background-color: var(--surface-color);
             color: var(--text-color);
             transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
         }
+        input[type="text"]#timeSignatureInput.invalid { /* Estilo para compás inválido */
+            border-color: var(--warn-color) !important; 
+            box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--warn-color) 25%, transparent);
+        }
+
 
         .section {
             margin-bottom: 30px; padding-bottom: 25px;
@@ -280,8 +285,8 @@
         #masterVolumeSlider { flex-grow: 1; max-width: 280px;}
 
         .file-management { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
-        #fileInputGlobal { display: none; } /* Se mantiene para cargar stems */
-        #loadingMessage, #exportMessage { font-size: 0.9em; color: var(--secondary-color); margin-left: 10px; } /* #projectMessage eliminado */
+        #fileInputGlobal { display: none; } 
+        #loadingMessage, #exportMessage { font-size: 0.9em; color: var(--secondary-color); margin-left: 10px; }
         
         .export-controls { display: flex; gap: 12px; align-items: center; margin-top: 15px;}
         .export-controls select {flex-basis: 130px;}
@@ -307,7 +312,7 @@
         .metronome-controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; align-items: center; }
         .metronome-control-group { display: flex; flex-direction: column; gap: 6px; }
         .metronome-control-group label { font-size: 0.9em; color: var(--secondary-color); font-weight: 600; }
-        .metronome-control-group select, .metronome-control-group input[type="number"], .metronome-control-group input[type="range"] { width: 100%; }
+        .metronome-control-group select, .metronome-control-group input[type="text"], .metronome-control-group input[type="number"], .metronome-control-group input[type="range"] { width: 100%; }
         #metronomeToggleButton { background-color: var(--secondary-color); color: var(--text-color-light); }
         #metronomeToggleButton.active { background-color: var(--accent-color); }
         #metronomeToggleButton.active:hover { background-color: color-mix(in srgb, var(--accent-color) 90%, black); }
@@ -436,7 +441,6 @@
             h3 { font-size: 1.2em; }
             .metronome-controls-grid { grid-template-columns: 1fr; }
             .file-management { flex-direction: column; gap: 8px; align-items: stretch;}
-            /* Ajuste para que el botón de cargar stems no ocupe todo el ancho si hay span al lado */
             .file-management:first-of-type { flex-direction: row; flex-wrap: wrap; }
             .file-management:first-of-type button { flex-grow: 1; }
 
@@ -476,12 +480,11 @@
 
         <div class="section file-management-section">
             <h2>Gestión de Archivos y Exportación</h2>
-            <div class="file-management"> <!-- Contenedor para Cargar Stems -->
+            <div class="file-management"> 
                 <input type="file" id="fileInputGlobal" multiple accept=".mp3,.wav">
-                <button id="loadFilesButton">📁 Cargar Pistas</button>
+                <button id="loadFilesButton">📁 Cargar Stems Locales</button>
                 <span id="loadingMessage"></span>
             </div>
-            <!-- SECCIÓN DE CARGAR/GUARDAR PROYECTO ELIMINADA -->
             <div class="export-controls">
                 <button id="exportMixButton" disabled>📤 Exportar Mezcla</button>
                 <select id="exportFormatSelect">
@@ -501,23 +504,19 @@
                 <div class="metronome-controls-grid">
                     <button id="metronomeToggleButton" class="inactive">🔇 Click OFF</button>
                     <div class="metronome-control-group">
-                        <label for="tempoInput">Tempo (BPM: 60-180)</label>
-                        <input type="number" id="tempoInput" value="120" min="60" max="180">
+                        <label for="tempoInput">Tempo (BPM: 20-300)</label>
+                        <input type="number" id="tempoInput" value="120" min="20" max="300">
                     </div>
                     <div class="metronome-control-group">
-                        <label for="timeSignatureSelect">Compás</label>
-                        <select id="timeSignatureSelect">
-                            <option value="4/4" selected>4/4</option>
-                            <option value="3/4">3/4</option>
-                            <option value="2/4">2/4</option>
-                            <option value="6/8">6/8</option>
-                        </select>
+                        <label for="timeSignatureInput">Compás (ej: 4/4)</label>
+                        <input type="text" id="timeSignatureInput" value="4/4" placeholder="ej: 4/4, 3/4, 7/8">
                     </div>
                     <div class="metronome-control-group">
                         <label for="clickSoundSelect">Sonido del Click</label>
                         <select id="clickSoundSelect">
                             <option value="suave" selected>Suave (Sine)</option>
                             <option value="seco">Seco (Square)</option>
+                            <option value="madera_simulada">Madera (Simulada)</option>
                         </select>
                     </div>
                     <div class="metronome-control-group">
@@ -551,13 +550,8 @@
             const loadFilesButton = document.getElementById('loadFilesButton');
             const fileInputGlobal = document.getElementById('fileInputGlobal');
             const loadingMessage = document.getElementById('loadingMessage');
-            // Elementos de proyecto eliminados
-            // const saveProjectButton = document.getElementById('saveProjectButton');
-            // const loadProjectButton = document.getElementById('loadProjectButton');
-            // const projectFileInput = document.getElementById('projectFileInput');
-            // const projectMessage = document.getElementById('projectMessage');
             const metronomeToggleButton = document.getElementById('metronomeToggleButton');
-            const timeSignatureSelect = document.getElementById('timeSignatureSelect');
+            const timeSignatureInput = document.getElementById('timeSignatureInput'); 
             const tempoInput = document.getElementById('tempoInput');
             const clickSoundSelect = document.getElementById('clickSoundSelect');
             const metronomeVolumeSlider = document.getElementById('metronomeVolumeSlider');
@@ -593,12 +587,14 @@
             let nextTrackId = 0;
 
             let metronome = {
-                isActive: false, isPlayingInternal: false, bpm: 120, timeSignature: [4, 4],
+                isActive: false, isPlayingInternal: false, bpm: 120, 
+                timeSignature: [4, 4], 
                 soundType: 'suave', volume: 0.7, schedulerTimerId: null, nextNoteTime: 0.0,
                 currentBeatInBar: 0, lookahead: 25.0, scheduleAheadTime: 0.1, gainNode: null,
                 clickSounds: {
-                    suave: { freq1: 880, freq2: 880, type: 'sine', decay: 0.05 },
-                    seco: { freq1: 1500, freq2: 1000, type: 'square', decay: 0.03 }
+                    suave: { freq1: 880, freq2: 660, type: 'sine', decay: 0.05 },
+                    seco: { freq1: 1500, freq2: 1000, type: 'square', decay: 0.03 },
+                    madera_simulada: { freq1: 2500, freq2: 2000, type: 'triangle', decay: 0.02, noiseDuration: 0.015, noiseGain: 0.2 }
                 }
             };
 
@@ -902,7 +898,6 @@
                         filesProcessed++;
                     } catch (err) { 
                         console.error(`Error decodificando ${file.name}:`, err); 
-                        // No mostrar error en projectMessage ya que fue eliminado
                     }
                     const percentage = Math.round((filesProcessed / totalFiles) * 100);
                     loadingPercentage.textContent = `${percentage}%`;
@@ -964,7 +959,14 @@
             function handleScrub(event) {
                 if (!audioContext) return; const seekTime = parseFloat(event.target.value);
                 if (isPlaying) { pauseAll(); globalPauseOffset = seekTime; playAll(); }
-                else { globalPauseOffset = seekTime; globalStartTime = (audioContext ? audioContext.currentTime : 0) - globalPauseOffset; updateUI(); }
+                else { 
+                    globalPauseOffset = seekTime; 
+                    globalStartTime = (audioContext ? audioContext.currentTime : 0) - globalPauseOffset; 
+                    if (metronome.isActive && !isPlaying) { 
+                        stopMetronomePlayback();
+                    }
+                    updateUI(); 
+                }
             }
             function updateUI() {
                 if (!audioContext) { if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = null; return; }
@@ -996,93 +998,165 @@
 
             metronomeToggleButton.addEventListener('click', () => {
                 initAudioContext(); metronome.isActive = !metronome.isActive;
-                if (metronome.isActive) { metronomeToggleButton.textContent = '🔊 Click ON'; metronomeToggleButton.classList.add('active'); metronomeToggleButton.classList.remove('inactive'); if (isPlaying) startMetronomePlayback(); }
-                else { metronomeToggleButton.textContent = '🔇 Click OFF'; metronomeToggleButton.classList.remove('active'); metronomeToggleButton.classList.add('inactive'); stopMetronomePlayback(); }
+                if (metronome.isActive) { 
+                    metronomeToggleButton.textContent = '🔊 Click ON'; 
+                    metronomeToggleButton.classList.add('active'); 
+                    metronomeToggleButton.classList.remove('inactive'); 
+                    if (isPlaying) startMetronomePlayback(); 
+                } else { 
+                    metronomeToggleButton.textContent = '🔇 Click OFF'; 
+                    metronomeToggleButton.classList.remove('active'); 
+                    metronomeToggleButton.classList.add('inactive'); 
+                    stopMetronomePlayback(); 
+                }
                 saveSession();
             });
             tempoInput.addEventListener('input', () => {
-                let newTempo = parseInt(tempoInput.value); if (isNaN(newTempo) || newTempo < 60) newTempo = 60; if (newTempo > 180) newTempo = 180;
-                metronome.bpm = newTempo; if (metronome.isActive && isPlaying) { stopMetronomePlayback(); startMetronomePlayback(); }
-                clearTimeout(metronome.saveTempoTimeout); metronome.saveTempoTimeout = setTimeout(saveSession, 500);
+                let newTempo = parseInt(tempoInput.value); 
+                if (isNaN(newTempo) || newTempo < 20) newTempo = 20;
+                if (newTempo > 300) newTempo = 300;
+                metronome.bpm = newTempo; 
+                tempoInput.value = newTempo; 
+                if (metronome.isActive && isPlaying) { 
+                    stopMetronomePlayback(); 
+                    startMetronomePlayback(); 
+                }
+                clearTimeout(metronome.saveTempoTimeout); 
+                metronome.saveTempoTimeout = setTimeout(saveSession, 500);
             });
-            timeSignatureSelect.addEventListener('change', () => {
-                const [num, den] = timeSignatureSelect.value.split('/').map(Number); metronome.timeSignature = [num, den];
-                if (metronome.isActive && isPlaying) { stopMetronomePlayback(); startMetronomePlayback(); } saveSession();
+            
+            timeSignatureInput.addEventListener('change', () => {
+                const parts = timeSignatureInput.value.trim().split('/');
+                if (parts.length === 2) {
+                    const num = parseInt(parts[0]);
+                    const den = parseInt(parts[1]);
+                    if (!isNaN(num) && !isNaN(den) && num > 0 && den > 0 && [2, 4, 8, 16].includes(den)) {
+                        metronome.timeSignature = [num, den];
+                        if (metronome.isActive && isPlaying) {
+                            stopMetronomePlayback();
+                            startMetronomePlayback();
+                        }
+                        saveSession();
+                        timeSignatureInput.classList.remove('invalid');
+                    } else {
+                        timeSignatureInput.classList.add('invalid');
+                        console.warn("Compás inválido. Formato: N/D (Denominador: 2,4,8,16). Ej: 4/4, 7/8. Se usará 4/4.");
+                        metronome.timeSignature = [4,4]; // Fallback
+                        // Opcional: timeSignatureInput.value = "4/4";
+                    }
+                } else {
+                    timeSignatureInput.classList.add('invalid');
+                    console.warn("Compás inválido. Formato: N/D. Ej: 4/4, 7/8. Se usará 4/4.");
+                    metronome.timeSignature = [4,4]; // Fallback
+                }
             });
-            clickSoundSelect.addEventListener('change', () => { metronome.soundType = clickSoundSelect.value; saveSession(); });
+
+            clickSoundSelect.addEventListener('change', () => { 
+                metronome.soundType = clickSoundSelect.value; 
+                saveSession(); 
+            });
             metronomeVolumeSlider.addEventListener('input', () => {
                 metronome.volume = parseFloat(metronomeVolumeSlider.value);
-                if (metronome.gainNode) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime); saveSession();
+                if (metronome.gainNode && audioContext) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime); 
+                saveSession();
             });
 
             function metronomeScheduler() {
+                if (!audioContext || !metronome.isActive || !isPlaying) return;
                 while (metronome.nextNoteTime < audioContext.currentTime + metronome.scheduleAheadTime) {
-                    playMetronomeClick(metronome.nextNoteTime, audioContext, metronome.gainNode);
+                    playMetronomeClick(metronome.nextNoteTime, audioContext, metronome.gainNode, metronome.currentBeatInBar === 0);
                     advanceMetronomeNote();
                 }
-                metronome.schedulerTimerId = setTimeout(metronomeScheduler, metronome.lookahead);
+                if (metronome.isActive && isPlaying) { // Continuar solo si sigue activo y reproduciendo
+                    metronome.schedulerTimerId = setTimeout(metronomeScheduler, metronome.lookahead);
+                }
             }
 
             function advanceMetronomeNote() {
+                const beatsPerBar = metronome.timeSignature[0];
                 const secondsPerBeat = 60.0 / metronome.bpm;
+                
                 metronome.nextNoteTime += secondsPerBeat;
-                metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % metronome.timeSignature[0];
+                metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % beatsPerBar;
             }
 
-            function playMetronomeClick(time, context, gain) {
-                if (!gain) return;
-                const osc = context.createOscillator();
+            function playMetronomeClick(time, context, gain, isAccent) {
+                if (!gain || !context) return;
                 const clickSoundParams = metronome.clickSounds[metronome.soundType];
-                osc.connect(gain);
-                osc.frequency.setValueAtTime(metronome.currentBeatInBar === 0 ? clickSoundParams.freq1 : clickSoundParams.freq2, time);
-                osc.type = clickSoundParams.type;
-                osc.start(time);
-                osc.stop(time + clickSoundParams.decay);
-            }
+                
+                const osc = context.createOscillator();
+                const clickGain = context.createGain(); 
+                clickGain.connect(gain);
+                osc.connect(clickGain);
 
+                osc.frequency.setValueAtTime(isAccent ? clickSoundParams.freq1 : clickSoundParams.freq2, time);
+                osc.type = clickSoundParams.type;
+
+                clickGain.gain.setValueAtTime(1, time);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, time + clickSoundParams.decay);
+
+                osc.start(time);
+                osc.stop(time + clickSoundParams.decay + 0.05); 
+
+                if (metronome.soundType === 'madera_simulada' && clickSoundParams.noiseDuration) {
+                    const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * clickSoundParams.noiseDuration), context.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < noiseBuffer.length; i++) {
+                        output[i] = (Math.random() * 2 - 1) * (isAccent ? 1 : 0.7);
+                    }
+                    const noiseSource = context.createBufferSource();
+                    noiseSource.buffer = noiseBuffer;
+                    
+                    const noiseEnvelopeGain = context.createGain();
+                    noiseEnvelopeGain.connect(gain);
+                    noiseSource.connect(noiseEnvelopeGain);
+
+                    noiseEnvelopeGain.gain.setValueAtTime(clickSoundParams.noiseGain, time);
+                    noiseEnvelopeGain.gain.exponentialRampToValueAtTime(0.001, time + clickSoundParams.noiseDuration);
+                    
+                    noiseSource.start(time);
+                    noiseSource.stop(time + clickSoundParams.noiseDuration + 0.05);
+                }
+            }
+            
             function startMetronomePlayback(offlineCtx = null, offlineRenderDuration = 0) {
                 const currentCtx = offlineCtx || audioContext;
-                const currentGlobalStartTime = offlineCtx ? 0 : globalStartTime;
-
                 if (!metronome.isActive || !currentCtx) return;
+            
                 if (!offlineCtx) {
-                     if (metronome.isPlayingInternal) return;
-                     metronome.isPlayingInternal = true;
-                }
-
-                let beatCounterForOffline = 0;
-                metronome.currentBeatInBar = 0;
-                const secondsPerBeat = 60.0 / metronome.bpm;
-
-                if (offlineCtx) {
-                    let scheduledTime = 0;
-                    const metronomeOfflineGain = offlineCtx.createGain();
-                    metronomeOfflineGain.gain.value = metronome.volume;
-                    metronomeOfflineGain.connect(offlineCtx.destination);
-
-                    while (scheduledTime < offlineRenderDuration) {
-                        const isFirstBeatOffline = (beatCounterForOffline % metronome.timeSignature[0]) === 0;
-                        const osc = offlineCtx.createOscillator();
-                        const clickSoundParams = metronome.clickSounds[metronome.soundType];
-                        osc.connect(metronomeOfflineGain);
-                        osc.frequency.setValueAtTime(isFirstBeatOffline ? clickSoundParams.freq1 : clickSoundParams.freq2, scheduledTime);
-                        osc.type = clickSoundParams.type;
-                        osc.start(scheduledTime);
-                        osc.stop(scheduledTime + clickSoundParams.decay);
-
-                        scheduledTime += secondsPerBeat;
-                        beatCounterForOffline++;
-                    }
-                } else {
-                    const elapsedTime = currentCtx.currentTime - currentGlobalStartTime;
-                    const currentBeatPosition = elapsedTime / secondsPerBeat;
-                    metronome.currentBeatInBar = Math.floor(currentBeatPosition) % metronome.timeSignature[0];
-                    metronome.nextNoteTime = currentGlobalStartTime + (Math.ceil(currentBeatPosition) * secondsPerBeat);
-                    if (metronome.nextNoteTime < currentCtx.currentTime) {
+                    if (metronome.isPlayingInternal) stopMetronomePlayback(); 
+                    metronome.isPlayingInternal = true;
+            
+                    const secondsPerBeat = 60.0 / metronome.bpm;
+                    const elapsedTimeSinceGlobalStart = (currentCtx.currentTime - globalStartTime);
+                    const currentPlayheadTime = Math.max(0, elapsedTimeSinceGlobalStart);
+                    const beatsElapsed = currentPlayheadTime / secondsPerBeat;
+                    
+                    metronome.currentBeatInBar = Math.floor(beatsElapsed) % metronome.timeSignature[0];
+                    
+                    const nextBeatIndex = Math.ceil(beatsElapsed - 0.0001); // Ajuste para evitar saltos por precisión
+                    metronome.nextNoteTime = globalStartTime + (nextBeatIndex * secondsPerBeat);
+            
+                    while (metronome.nextNoteTime < currentCtx.currentTime - 0.001) { 
                         metronome.nextNoteTime += secondsPerBeat;
                         metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % metronome.timeSignature[0];
                     }
                     metronomeScheduler();
+                } else { 
+                    let scheduledTime = 0;
+                    let currentBeatInBarOffline = 0;
+                    const beatsPerBarOffline = metronome.timeSignature[0];
+                    const secondsPerBeatOffline = 60.0 / metronome.bpm;
+                    const metronomeOfflineGain = offlineCtx.createGain();
+                    metronomeOfflineGain.gain.value = metronome.volume;
+                    metronomeOfflineGain.connect(offlineCtx.destination);
+            
+                    while (scheduledTime < offlineRenderDuration) {
+                        const isAccent = currentBeatInBarOffline === 0;
+                        playMetronomeClick(scheduledTime, offlineCtx, metronomeOfflineGain, isAccent);
+                        scheduledTime += secondsPerBeatOffline;
+                        currentBeatInBarOffline = (currentBeatInBarOffline + 1) % beatsPerBarOffline;
+                    }
                 }
             }
 
@@ -1227,23 +1301,27 @@
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
             }
-
-            function getSessionDataForSave() { // No longer saves project-specific file info
+            
+            function getSessionDataForSave() {
                  return {
-                    version: "1.3.9-no-project-save",
-                    tracks: tracks.map(t => ({ // Still save track settings
+                    version: "1.3.10-metronome-final",
+                    tracks: tracks.map(t => ({ 
                         volume: t.volume, isMuted: t.isMuted, isSoloed: t.isSoloed,
-                        // Keep loadedFileName/fileUrl for potential re-load from URL or to show name
                         loadedFileName: t.loadedFileName, 
                         fileUrl: t.fileUrl, 
                         sourceType: t.sourceType 
                     })),
-                    metronome: { bpm: metronome.bpm, timeSignature: timeSignatureSelect.value, isActive: metronome.isActive, soundType: metronome.soundType, volume: metronome.volume },
+                    metronome: { 
+                        bpm: metronome.bpm, 
+                        timeSignature: timeSignatureInput.value,
+                        isActive: metronome.isActive, 
+                        soundType: metronome.soundType, 
+                        volume: metronome.volume 
+                    },
                     masterVolume: parseFloat(masterVolumeSlider.value),
                     globalScrubberValue: parseFloat(globalScrubber.value) || 0
                 };
             }
-            // saveProjectToFile y loadProjectFromFile ELIMINADAS
 
             function resetGlobalToggleButtonsToDefaults() {
                 isSoloButtonInRestoreMode = false;
@@ -1259,30 +1337,29 @@
                 previousMutedTrackIds = [];
             }
             
-            const LS_KEY = 'multipistaAdvancedSession_v1.3.9'; // Actualizar versión
+            const LS_KEY = 'multipistaAdvancedSession_v1.3.10';
             function saveSession() {
                 if (typeof localStorage === 'undefined') return; const sessionData = getSessionDataForSave();
                 try { localStorage.setItem(LS_KEY, JSON.stringify(sessionData)); }
                 catch (e) { console.warn("No se pudo guardar la sesión en LS:", e); }
             }
-            async function loadSession() { // Esta función ahora carga la sesión, no un "proyecto"
+            async function loadSession() {
                 if (typeof localStorage === 'undefined') return;
                 try {
                     const savedSession = localStorage.getItem(LS_KEY);
                     if (savedSession) {
                         const data = JSON.parse(savedSession);
-                        await applyLoadedData(data); // applyLoadedData sigue siendo relevante
+                        await applyLoadedData(data); 
                         resetGlobalToggleButtonsToDefaults();
                         console.log("Sesión anterior cargada desde LocalStorage.");
-                        // projectMessage.textContent = "Sesión anterior cargada..."; // Ya no existe projectMessage
-                        loadingMessage.textContent = "Sesión anterior cargada."; // Usar loadingMessage en su lugar
+                        loadingMessage.textContent = "Sesión anterior cargada."; 
                          setTimeout(() => loadingMessage.textContent = "", 6000);
                     }
                 } catch (e) { console.warn("No se pudo cargar la sesión desde LS:", e); localStorage.removeItem(LS_KEY); }
             }
 
 
-            async function applyLoadedData(data) { // Esta función ahora es para la sesión de localStorage
+            async function applyLoadedData(data) {
                 initAudioContext();
                 tracksContainer.innerHTML = ''; tracks = []; nextTrackId = 0; maxDuration = 0;
                 tracksContainerPlaceholder.style.display = 'block';
@@ -1329,24 +1406,56 @@
                     exportMixButton.disabled = true;
                 }
 
+                if (data.metronome) {
+                    tempoInput.value = data.metronome.bpm || 120; 
+                    metronome.bpm = parseInt(tempoInput.value);
 
-                tempoInput.value = data.metronome.bpm; metronome.bpm = data.metronome.bpm;
-                timeSignatureSelect.value = data.metronome.timeSignature;
-                const [num, den] = data.metronome.timeSignature.split('/').map(Number); metronome.timeSignature = [num, den];
-                clickSoundSelect.value = data.metronome.soundType; metronome.soundType = data.metronome.soundType;
-                metronomeVolumeSlider.value = data.metronome.volume; metronome.volume = data.metronome.volume;
-                if(metronome.gainNode) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime);
+                    timeSignatureInput.value = data.metronome.timeSignature || "4/4";
+                    const parts = timeSignatureInput.value.trim().split('/');
+                    if (parts.length === 2) {
+                        const num = parseInt(parts[0]);
+                        const den = parseInt(parts[1]);
+                        if (!isNaN(num) && !isNaN(den) && num > 0 && den > 0 && [2,4,8,16].includes(den)) {
+                            metronome.timeSignature = [num, den];
+                        } else {
+                            metronome.timeSignature = [4,4]; 
+                            timeSignatureInput.value = "4/4";
+                        }
+                    } else {
+                        metronome.timeSignature = [4,4];
+                        timeSignatureInput.value = "4/4";
+                    }
 
-                const currentMetronomeActive = metronome.isActive;
-                if (data.metronome.isActive && !currentMetronomeActive) {
-                    metronomeToggleButton.click();
-                } else if (!data.metronome.isActive && currentMetronomeActive) {
-                     metronomeToggleButton.click();
+
+                    clickSoundSelect.value = data.metronome.soundType || "suave"; 
+                    metronome.soundType = clickSoundSelect.value;
+                    metronomeVolumeSlider.value = data.metronome.volume !== undefined ? data.metronome.volume : 0.7; 
+                    metronome.volume = parseFloat(metronomeVolumeSlider.value);
+                    if(metronome.gainNode && audioContext) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime);
+                    
+                    // Restaurar estado activo del metrónomo
+                    // Asegurarse de que el estado visual del botón coincida
+                    const currentMetronomeActiveState = metronome.isActive;
+                    if (data.metronome.isActive && !currentMetronomeActiveState) {
+                        metronomeToggleButton.click(); // Activa el metrónomo y actualiza el botón
+                    } else if (!data.metronome.isActive && currentMetronomeActiveState) {
+                        metronomeToggleButton.click(); // Desactiva el metrónomo y actualiza el botón
+                    } else { // Si el estado guardado y el actual coinciden, solo actualizar el botón visualmente
+                         if (metronome.isActive) {
+                            metronomeToggleButton.textContent = '🔊 Click ON'; 
+                            metronomeToggleButton.classList.add('active'); 
+                            metronomeToggleButton.classList.remove('inactive');
+                         } else {
+                            metronomeToggleButton.textContent = '🔇 Click OFF'; 
+                            metronomeToggleButton.classList.remove('active'); 
+                            metronomeToggleButton.classList.add('inactive');
+                         }
+                    }
                 }
 
 
                 masterVolumeSlider.value = data.masterVolume || 0.8;
-                if (masterGainNode) masterGainNode.gain.setValueAtTime(parseFloat(masterVolumeSlider.value), audioContext.currentTime);
+                if (masterGainNode && audioContext) masterGainNode.gain.setValueAtTime(parseFloat(masterVolumeSlider.value), audioContext.currentTime);
                 globalPauseOffset = data.globalScrubberValue || 0;
 
                 updateAllTrackVisualsAndVolumes();
