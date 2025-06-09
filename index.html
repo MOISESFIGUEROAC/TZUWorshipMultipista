@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TZU Worship - Multipista</title>
+    
+    <!-- Incluyendo Tailwind CSS para un diseño moderno y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Importando una fuente moderna y gruesa desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Estilo para aplicar la fuente personalizada */
+        .font-anton {
+            font-family: 'Anton', sans-serif;
+        }
+        /* Asegura que la imagen de fondo cubra el área sin distorsionarse */
+        .hero-image {
+            background-image: url('IMG_311980.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+
+    <!-- Contenedor principal de la página -->
+    <div class="min-h-screen flex flex-col">
+
+        <!-- Sección de la imagen principal (Hero) -->
+        <!-- La imagen se establece como fondo de este div para un mejor control -->
+        <header class="hero-image h-96 md:h-screen/2 lg:h-screen/1.5 w-full relative flex items-center justify-center">
+            <!-- Superposición oscura para mejorar la legibilidad del texto -->
+            <div class="absolute inset-0 bg-black opacity-50"></div>
+        </header>
+
+        <!-- Sección del título -->
+        <main class="flex-grow flex items-center justify-center -mt-32 md:-mt-48 z-10">
+            <div class="text-center p-6">
+                <!-- Título principal con la fuente y estilos solicitados -->
+                <h1 class="font-anton text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-wider uppercase">
+                    TZU Worship
+                </h1>
+                <p class="text-2xl sm:text-3xl md:text-4xl text-gray-300 mt-2 tracking-wide">
+                    Multipista
+                </p>
+            </div>
+        </main>
+        
+        <!-- Pie de página opcional -->
+        <footer class="text-center p-4 text-gray-500 text-sm">
+            <p>&copy; 2025 TZU Worship. Todos los derechos reservados.</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TZU Worship - Multipista</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-family-sans-serif: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            
+            /* Modo Claro */
+            --bg-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --primary-color: #FF7A00; 
+            --primary-color-hover: #E56E00;
+            --secondary-color: #6c757d;
+            --text-color: #212529; 
+            --text-color-light: #f8f9fa;
+            --border-color: #dee2e6;
+            --accent-color: #FF7A00; 
+            --warn-color: #D9534F; 
+            --info-color: #FFA500;  
+            --disabled-color: #e9ecef;
+            --button-text-color: var(--text-color-light);
+        }
+
+        :root[data-theme="dark"] {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --primary-color: #FF8C00;
+            --primary-color-hover: #FF9D2A;
+            --secondary-color: #4a4a4a;
+            --text-color: #e0e0e0; 
+            --text-color-light: #121212;
+            --border-color: #333333;
+            --accent-color: #FF8C00;
+            --warn-color: #E74C3C;
+            --info-color: #FFAE42;
+            --disabled-color: #2c2c2c;
+            --button-text-color: var(--text-color-light);
+        }
+
+        body {
+            font-family: var(--font-family-sans-serif);
+            margin: 0;
+            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 15px;
+            font-weight: 400;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: var(--surface-color);
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+            transition: background-color 0.3s ease;
+            position: relative; 
+        }
+
+        #loadingOverlay {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; 
+            color: white;
+            font-size: 3em; 
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            visibility: hidden; 
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #loadingOverlay.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+
+        h1, h2, h3 { 
+            margin-top: 0; 
+            color: var(--text-color); 
+            transition: color 0.3s ease;
+            font-weight: 700;
+        }
+        h1 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            font-size: 2.2em; 
+            letter-spacing: -0.5px;
+        }
+        h2 { 
+            margin-bottom: 20px; 
+            font-size: 1.6em; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 10px; 
+            transition: border-color 0.3s ease;
+            font-weight: 600;
+        }
+        h3 { 
+            margin-bottom: 15px; 
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: background-color 0.2s ease, opacity 0.2s ease, color 0.2s ease, transform 0.1s ease;
+            background-color: var(--primary-color);
+            color: var(--button-text-color);
+        }
+        button:hover { 
+            background-color: var(--primary-color-hover);
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0px);
+        }
+
+        button:disabled {
+            background-color: var(--disabled-color);
+            color: var(--secondary-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: translateY(0px);
+        }
+        button.secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color-light);
+        }
+         button.secondary:hover {
+            background-color: color-mix(in srgb, var(--secondary-color) 90%, black);
+        }
+
+        button.toggled {
+            background-color: var(--info-color);
+            color: var(--text-color-light);
+        }
+         button.toggled:hover {
+            background-color: color-mix(in srgb, var(--info-color) 90%, black);
+        }
+        
+        #themeToggleButton {
+            background-color: var(--secondary-color);
+            color: var(--text-color-light);
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+
+        input[type="range"] { accent-color: var(--primary-color); cursor: pointer; }
+        select, input[type="number"] {
+            padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; font-size: 0.95em; box-sizing: border-box;
+            background-color: var(--surface-color);
+            color: var(--text-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .section {
+            margin-bottom: 30px; padding-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .global-playback-controls { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        #globalPlayPauseButton { 
+            background-color: var(--accent-color); 
+            color: var(--button-text-color); 
+            font-weight: 700; 
+            padding: 12px 28px; 
+            font-size: 1.1em; 
+            min-width: 160px; text-align: center; 
+        }
+        #globalPlayPauseButton.playing { background-color: var(--warn-color); }
+        #globalPlayPauseButton:hover {
+             background-color: color-mix(in srgb, var(--accent-color) 90%, black);
+        }
+        #globalPlayPauseButton.playing:hover {
+             background-color: color-mix(in srgb, var(--warn-color) 90%, black);
+        }
+
+        .scrubber-container { flex-grow: 1; display: flex; align-items: center; gap: 12px; }
+        #globalScrubber { width: 100%; height: 12px; -webkit-appearance: none; appearance: none; background: var(--disabled-color); border-radius: 6px; }
+        #globalScrubber::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        #globalScrubber::-moz-range-thumb { width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%; border: none; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        #globalTimeDisplay { font-size: 0.95em; color: var(--secondary-color); min-width: 100px; text-align: right; font-weight: 600; }
+        .master-volume-control { display: flex; align-items: center; gap: 10px; margin-top:20px; }
+        .master-volume-control label { font-size: 0.95em; font-weight: 600; }
+        #masterVolumeSlider { flex-grow: 1; max-width: 280px;}
+
+        .file-management { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+        #fileInputGlobal { display: none; } /* Se mantiene para cargar stems */
+        #loadingMessage, #exportMessage { font-size: 0.9em; color: var(--secondary-color); margin-left: 10px; } /* #projectMessage eliminado */
+        
+        .export-controls { display: flex; gap: 12px; align-items: center; margin-top: 15px;}
+        .export-controls select {flex-basis: 130px;}
+        #exportProgressContainer {
+            width: 100%;
+            background-color: var(--disabled-color);
+            border-radius: 6px;
+            margin-top: 10px;
+            height: 12px; 
+            overflow: hidden; 
+            display: none; 
+        }
+        #exportProgressBar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.2s ease-out;
+            border-radius: 6px;
+        }
+
+
+        .metronome-section { background-color: var(--bg-color); padding: 20px; border-radius: 10px; transition: background-color 0.3s ease; }
+        .metronome-controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; align-items: center; }
+        .metronome-control-group { display: flex; flex-direction: column; gap: 6px; }
+        .metronome-control-group label { font-size: 0.9em; color: var(--secondary-color); font-weight: 600; }
+        .metronome-control-group select, .metronome-control-group input[type="number"], .metronome-control-group input[type="range"] { width: 100%; }
+        #metronomeToggleButton { background-color: var(--secondary-color); color: var(--text-color-light); }
+        #metronomeToggleButton.active { background-color: var(--accent-color); }
+        #metronomeToggleButton.active:hover { background-color: color-mix(in srgb, var(--accent-color) 90%, black); }
+
+
+        .track-mix-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+
+        .tracks-container-wrapper { margin-top: 25px; }
+        #tracksContainerPlaceholder {
+            font-style: italic; color: var(--secondary-color); padding: 20px;
+            text-align: center; border: 2px dashed var(--border-color); border-radius: 10px;
+            transition: color 0.3s ease, border-color 0.3s ease;
+            font-size: 1.05em;
+        }
+        
+        .tracks-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+            gap: 18px; 
+        }
+
+        .track {
+            background-color: var(--surface-color); padding: 15px 20px; border-radius: 10px;
+            border: 1px solid var(--border-color); display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto;
+            grid-template-areas: "track-name" "track-controls-progress";
+            gap: 12px; align-items: center;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease;
+        }
+        .track:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+        .track.soloed { 
+            box-shadow: 0 0 0 3px var(--info-color) inset; 
+            background-color: color-mix(in srgb, var(--info-color) 10%, var(--surface-color)); 
+        }
+        .track.muted-by-solo { opacity: 0.5; }
+
+        .track-name {
+            grid-area: track-name; font-weight: 600; color: var(--text-color);
+            font-size: 1.1em; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+            transition: color 0.3s ease;
+        }
+        .track-name .track-file-label {
+            overflow: hidden; text-overflow: ellipsis; 
+             min-width: 0; 
+        }
+        .track-name .track-status-indicator {
+            font-size: 0.85em; font-style: italic; color: var(--secondary-color);
+            margin-left: 10px; white-space: nowrap; flex-shrink: 0;
+            transition: color 0.3s ease;
+        }
+
+        .track-controls-progress { grid-area: track-controls-progress; display: flex; flex-direction: column; gap: 10px; }
+        .track-interactive-elements { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; } 
+        .track-interactive-elements .mute-button, .track-interactive-elements .solo-button {
+            color: var(--button-text-color); padding: 7px 10px; font-size: 0.85em; min-width: 45px; text-align:center; font-weight: 700; 
+        }
+        .track-interactive-elements .mute-button { background-color: var(--accent-color); }
+        .track-interactive-elements .mute-button.muted { background-color: var(--warn-color); }
+        .track-interactive-elements .mute-button:hover { background-color: color-mix(in srgb, var(--accent-color) 90%, black); }
+        .track-interactive-elements .mute-button.muted:hover { background-color: color-mix(in srgb, var(--warn-color) 90%, black); }
+
+        .track-interactive-elements .solo-button { background-color: var(--secondary-color); }
+        .track-interactive-elements .solo-button.soloed { background-color: var(--info-color); color: var(--text-color-light); }
+        .track-interactive-elements .solo-button:hover { background-color: color-mix(in srgb, var(--secondary-color) 90%, black); }
+        .track-interactive-elements .solo-button.soloed:hover { background-color: color-mix(in srgb, var(--info-color) 90%, black); }
+
+        .track-interactive-elements .volume-slider {
+            flex-grow: 1; min-width:100px; max-width: 160px; height: 10px; 
+            -webkit-appearance: none; appearance: none; background: var(--disabled-color); border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .track-interactive-elements .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--primary-color); border-radius: 50%; }
+        .track-interactive-elements .volume-slider::-moz-range-thumb { width: 16px; height: 16px; background: var(--primary-color); border-radius: 50%; border: none; }
+
+        .track-progress-bar { width: 100%; height: 8px; background-color: var(--disabled-color); border-radius: 4px; overflow: hidden; transition: background-color 0.3s ease; }
+        .track-progress-bar-fill { width: 0%; height: 100%; background-color: var(--primary-color); transition: width 0.1s linear, background-color 0.3s ease; border-radius: 4px;}
+
+        @media (max-width: 1024px) {
+            .app-container {
+                max-width: 95%; 
+            }
+             .tracks-container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            }
+        }
+
+
+        @media (max-width: 768px) {
+            body { padding: 10px; font-size: 14px; }
+            .app-container { 
+                padding: 20px 15px;
+                max-width: 100%; 
+            }
+            h1 { font-size: 1.8em; }
+            .header-controls { flex-direction: column-reverse; align-items: flex-start; gap: 10px;}
+            #themeToggleButton { align-self: flex-end;}
+            .global-playback-controls { flex-direction: column; align-items: stretch; }
+            #globalPlayPauseButton { width: 100%; margin-bottom: 10px;}
+            .scrubber-container { width: 100%; }
+            #globalTimeDisplay { text-align: center; margin-top: 5px;}
+            .master-volume-control label { display:none; }
+            .master-volume-control { margin-top:10px; }
+            #masterVolumeSlider { max-width: none;}
+            .track-interactive-elements .volume-slider { max-width: none; }
+            .export-controls { flex-direction: column; align-items: stretch;}
+            .export-controls button, .export-controls select { width: 100%; margin-bottom: 5px; }
+            
+            .tracks-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.6em; }
+            h2 { font-size: 1.4em; }
+            h3 { font-size: 1.2em; }
+            .metronome-controls-grid { grid-template-columns: 1fr; }
+            .file-management { flex-direction: column; gap: 8px; align-items: stretch;}
+            /* Ajuste para que el botón de cargar stems no ocupe todo el ancho si hay span al lado */
+            .file-management:first-of-type { flex-direction: row; flex-wrap: wrap; }
+            .file-management:first-of-type button { flex-grow: 1; }
+
+
+            .track-name { flex-direction: column; align-items: flex-start;}
+            .track-name .track-status-indicator { margin-left: 0; margin-top: 3px;}
+            .track-mix-controls { flex-direction: column; align-items: stretch;}
+            .track-mix-controls button { width: 100%; }
+             #loadingOverlay { font-size: 2.5em; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay">
+        <span id="loadingPercentage">0%</span>
+    </div>
+    <div class="app-container">
+        <div class="header-controls">
+            <h1>TZU Worship - Multipista</h1>
+            <button id="themeToggleButton">🌙 Modo Oscuro</button>
+        </div>
+
+        <div class="section global-controls-section">
+            <h2>Controles Globales</h2>
+            <div class="global-playback-controls">
+                <button id="globalPlayPauseButton" class="paused">▶️ Play</button>
+                <div class="scrubber-container">
+                    <input type="range" id="globalScrubber" value="0" min="0" max="100" step="0.1" disabled>
+                    <span id="globalTimeDisplay">00:00 / 00:00</span>
+                </div>
+            </div>
+            <div class="master-volume-control">
+                <label for="masterVolumeSlider">Volumen General:</label>
+                <input type="range" id="masterVolumeSlider" min="0" max="1" step="0.01" value="0.8">
+            </div>
+        </div>
+
+        <div class="section file-management-section">
+            <h2>Gestión de Archivos y Exportación</h2>
+            <div class="file-management"> <!-- Contenedor para Cargar Stems -->
+                <input type="file" id="fileInputGlobal" multiple accept=".mp3,.wav">
+                <button id="loadFilesButton">📁 Cargar Pistas</button>
+                <span id="loadingMessage"></span>
+            </div>
+            <!-- SECCIÓN DE CARGAR/GUARDAR PROYECTO ELIMINADA -->
+            <div class="export-controls">
+                <button id="exportMixButton" disabled>📤 Exportar Mezcla</button>
+                <select id="exportFormatSelect">
+                    <option value="wav" selected>WAV</option>
+                    <option value="mp3" disabled>MP3 (Próximamente)</option>
+                </select>
+                <span id="exportMessage"></span>
+            </div>
+            <div id="exportProgressContainer">
+                <div id="exportProgressBar"></div>
+            </div>
+        </div>
+
+        <div class="section metronome-section-wrapper">
+             <div class="metronome-section">
+                <h3>Metrónomo</h3>
+                <div class="metronome-controls-grid">
+                    <button id="metronomeToggleButton" class="inactive">🔇 Click OFF</button>
+                    <div class="metronome-control-group">
+                        <label for="tempoInput">Tempo (BPM: 60-180)</label>
+                        <input type="number" id="tempoInput" value="120" min="60" max="180">
+                    </div>
+                    <div class="metronome-control-group">
+                        <label for="timeSignatureSelect">Compás</label>
+                        <select id="timeSignatureSelect">
+                            <option value="4/4" selected>4/4</option>
+                            <option value="3/4">3/4</option>
+                            <option value="2/4">2/4</option>
+                            <option value="6/8">6/8</option>
+                        </select>
+                    </div>
+                    <div class="metronome-control-group">
+                        <label for="clickSoundSelect">Sonido del Click</label>
+                        <select id="clickSoundSelect">
+                            <option value="suave" selected>Suave (Sine)</option>
+                            <option value="seco">Seco (Square)</option>
+                        </select>
+                    </div>
+                    <div class="metronome-control-group">
+                        <label for="metronomeVolumeSlider">Volumen del Click</label>
+                        <input type="range" id="metronomeVolumeSlider" min="0" max="1" step="0.01" value="0.7">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tracks-container-wrapper section">
+            <h2>Pistas</h2>
+            <div class="track-mix-controls">
+                <button id="toggleGlobalSoloButton" class="secondary">🚫 Limpiar Solos</button>
+                <button id="toggleGlobalMuteButton" class="secondary">🔊 Limpiar Mutes</button>
+            </div>
+            <div id="tracksContainerPlaceholder">Carga archivos de audio para comenzar...</div>
+            <div class="tracks-container" id="tracksContainer">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tracksContainer = document.getElementById('tracksContainer');
+            const tracksContainerPlaceholder = document.getElementById('tracksContainerPlaceholder');
+            const globalPlayPauseButton = document.getElementById('globalPlayPauseButton');
+            const globalScrubber = document.getElementById('globalScrubber');
+            const globalTimeDisplay = document.getElementById('globalTimeDisplay');
+            const masterVolumeSlider = document.getElementById('masterVolumeSlider');
+            const loadFilesButton = document.getElementById('loadFilesButton');
+            const fileInputGlobal = document.getElementById('fileInputGlobal');
+            const loadingMessage = document.getElementById('loadingMessage');
+            // Elementos de proyecto eliminados
+            // const saveProjectButton = document.getElementById('saveProjectButton');
+            // const loadProjectButton = document.getElementById('loadProjectButton');
+            // const projectFileInput = document.getElementById('projectFileInput');
+            // const projectMessage = document.getElementById('projectMessage');
+            const metronomeToggleButton = document.getElementById('metronomeToggleButton');
+            const timeSignatureSelect = document.getElementById('timeSignatureSelect');
+            const tempoInput = document.getElementById('tempoInput');
+            const clickSoundSelect = document.getElementById('clickSoundSelect');
+            const metronomeVolumeSlider = document.getElementById('metronomeVolumeSlider');
+            const themeToggleButton = document.getElementById('themeToggleButton');
+
+            const toggleGlobalSoloButton = document.getElementById('toggleGlobalSoloButton');
+            const toggleGlobalMuteButton = document.getElementById('toggleGlobalMuteButton');
+
+            const exportMixButton = document.getElementById('exportMixButton');
+            const exportFormatSelect = document.getElementById('exportFormatSelect');
+            const exportMessage = document.getElementById('exportMessage');
+            const exportProgressContainer = document.getElementById('exportProgressContainer');
+            const exportProgressBar = document.getElementById('exportProgressBar');
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const loadingPercentage = document.getElementById('loadingPercentage');
+
+
+            let previousSoloedTrackIds = [];
+            let isSoloButtonInRestoreMode = false;
+            const SOLO_BUTTON_TEXT = { CLEAR: "🚫 Limpiar Solos", RESTORE: "🔄 Restaurar Solos" };
+
+            let previousMutedTrackIds = [];
+            let isMuteButtonInRestoreMode = false;
+            const MUTE_BUTTON_TEXT = { CLEAR: "🔊 Limpiar Mutes", RESTORE: "🔄 Restaurar Mutes" };
+
+
+            let audioContext;
+            let tracks = [];
+            let masterGainNode;
+            let isPlaying = false;
+            let globalStartTime = 0, globalPauseOffset = 0, maxDuration = 0, animationFrameId = null;
+            let nextTrackId = 0;
+
+            let metronome = {
+                isActive: false, isPlayingInternal: false, bpm: 120, timeSignature: [4, 4],
+                soundType: 'suave', volume: 0.7, schedulerTimerId: null, nextNoteTime: 0.0,
+                currentBeatInBar: 0, lookahead: 25.0, scheduleAheadTime: 0.1, gainNode: null,
+                clickSounds: {
+                    suave: { freq1: 880, freq2: 880, type: 'sine', decay: 0.05 },
+                    seco: { freq1: 1500, freq2: 1000, type: 'square', decay: 0.03 }
+                }
+            };
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    themeToggleButton.textContent = '☀️ Modo Claro';
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    themeToggleButton.textContent = '🌙 Modo Oscuro';
+                }
+            }
+
+            function toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    applyTheme('light');
+                    localStorage.setItem('themePreference', 'light');
+                } else {
+                    applyTheme('dark');
+                    localStorage.setItem('themePreference', 'dark');
+                }
+            }
+
+            function loadThemePreference() {
+                const preferredTheme = localStorage.getItem('themePreference');
+                if (preferredTheme) {
+                    applyTheme(preferredTheme);
+                } else {
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !preferredTheme) {
+                        applyTheme('dark');
+                    } else {
+                        applyTheme('light');
+                    }
+                }
+            }
+            themeToggleButton.addEventListener('click', toggleTheme);
+            loadThemePreference();
+
+
+            function initAudioContext() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    masterGainNode = audioContext.createGain();
+                    masterGainNode.gain.value = parseFloat(masterVolumeSlider.value);
+                    masterGainNode.connect(audioContext.destination);
+
+                    metronome.gainNode = audioContext.createGain();
+                    metronome.gainNode.gain.value = metronome.volume;
+                    metronome.gainNode.connect(audioContext.destination);
+
+                    tracks.forEach(track => {
+                        if (!track.gainNode) {
+                            track.gainNode = audioContext.createGain();
+                            track.gainNode.connect(masterGainNode);
+                            applyEffectiveVolume(track.id);
+                        }
+                    });
+                }
+                if (audioContext.state === 'suspended') audioContext.resume();
+            }
+            document.body.addEventListener('click', initAudioContext, { once: true });
+            document.body.addEventListener('touchstart', initAudioContext, { once: true });
+
+            function createAndAddTrackElement({fileName, audioBuffer, fileUrl = null, sourceType = 'local', existingTrackData = {}}) {
+                const trackId = `track-${nextTrackId++}`;
+                const trackElement = document.createElement('div');
+                trackElement.classList.add('track');
+                trackElement.id = trackId;
+
+                let displayName = fileName;
+                let statusIndicatorHTML = "";
+                if (sourceType === 'url' && !audioBuffer) {
+                    statusIndicatorHTML = `<span class="track-status-indicator">(Cargando URL...)</span>`;
+                } else if (!audioBuffer && sourceType === 'project-placeholder') {
+                     statusIndicatorHTML = `<span class="track-status-indicator">(Esperando recarga...)</span>`;
+                } else if (audioBuffer && sourceType === 'url'){
+                     statusIndicatorHTML = `<span class="track-status-indicator">(URL Cargada)</span>`;
+                }
+
+
+                trackElement.innerHTML = `
+                    <div class="track-name" title="${displayName}">
+                        <span class="track-file-label">${displayName}</span>
+                        ${statusIndicatorHTML}
+                    </div>
+                    <div class="track-controls-progress">
+                        <div class="track-interactive-elements">
+                            <button class="mute-button" title="Mute (M)">M</button>
+                            <button class="solo-button" title="Solo (S)">S</button>
+                            <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${existingTrackData.volume || 0.8}" title="Volumen de pista">
+                        </div>
+                        <div class="track-progress-bar">
+                            <div class="track-progress-bar-fill"></div>
+                        </div>
+                    </div>
+                `;
+                tracksContainer.appendChild(trackElement);
+                tracksContainerPlaceholder.style.display = 'none';
+                exportMixButton.disabled = false;
+
+                const newTrack = {
+                    id: trackId, name: fileName, element: trackElement, audioBuffer: audioBuffer,
+                    sourceNode: null, gainNode: audioContext ? audioContext.createGain() : null,
+                    muteButton: trackElement.querySelector('.mute-button'),
+                    soloButton: trackElement.querySelector('.solo-button'),
+                    volumeSlider: trackElement.querySelector('.volume-slider'),
+                    progressBarFill: trackElement.querySelector('.track-progress-bar-fill'),
+                    isMuted: existingTrackData.isMuted || false, isSoloed: existingTrackData.isSoloed || false,
+                    volume: existingTrackData.volume || 0.8, duration: audioBuffer ? audioBuffer.duration : 0,
+                    loadedFileName: sourceType === 'local' ? fileName : (existingTrackData.loadedFileName || null),
+                    fileUrl: fileUrl || existingTrackData.fileUrl,
+                    sourceType: sourceType,
+                    statusIndicatorElement: trackElement.querySelector('.track-status-indicator')
+                };
+
+                if (newTrack.gainNode) {
+                    newTrack.gainNode.connect(masterGainNode);
+                }
+
+                newTrack.muteButton.addEventListener('click', () => toggleMute(newTrack.id));
+                newTrack.soloButton.addEventListener('click', () => toggleSolo(newTrack.id));
+                newTrack.volumeSlider.addEventListener('input', (event) => setTrackVolume(newTrack.id, parseFloat(event.target.value)));
+
+                tracks.push(newTrack);
+                if (audioBuffer) updateMaxDurationAndScrubber();
+                updateAllTrackVisualsAndVolumes();
+                return newTrack;
+            }
+
+            function updateTrackStatusIndicator(trackId, message, isError = false) {
+                const track = findTrackById(trackId);
+                if (!track) return;
+                let nameContainer = track.element.querySelector('.track-name');
+                let statusSpan = track.statusIndicatorElement;
+                if (!statusSpan && message) {
+                    const newSpan = document.createElement('span');
+                    newSpan.classList.add('track-status-indicator');
+                    nameContainer.appendChild(newSpan);
+                    track.statusIndicatorElement = newSpan;
+                    statusSpan = newSpan;
+                }
+                if (statusSpan) {
+                    statusSpan.textContent = message ? `(${message})` : "";
+                    statusSpan.style.color = isError ? 'var(--warn-color)' : 'var(--secondary-color)';
+                }
+            }
+
+            function findTrackById(trackId) { return tracks.find(t => t.id === trackId); }
+
+            function toggleMute(trackId) {
+                if (!audioContext) initAudioContext();
+                const track = findTrackById(trackId);
+                if (!track) return;
+                track.isMuted = !track.isMuted;
+                updateAllTrackVisualsAndVolumes();
+                saveSession();
+            }
+
+            function toggleSolo(trackId) {
+                if (!audioContext) initAudioContext();
+                const track = findTrackById(trackId);
+                if (!track) return;
+                track.isSoloed = !track.isSoloed;
+                updateAllTrackVisualsAndVolumes();
+                saveSession();
+            }
+
+            toggleGlobalSoloButton.addEventListener('click', () => {
+                if (!audioContext) initAudioContext();
+                if (!isSoloButtonInRestoreMode) {
+                    const currentSoloed = tracks.filter(t => t.isSoloed).map(t => t.id);
+                    if (currentSoloed.length > 0) {
+                        previousSoloedTrackIds = [...currentSoloed];
+                        tracks.forEach(track => { track.isSoloed = false; });
+                        toggleGlobalSoloButton.textContent = SOLO_BUTTON_TEXT.RESTORE;
+                        toggleGlobalSoloButton.classList.remove('secondary');
+                        toggleGlobalSoloButton.classList.add('toggled');
+                        isSoloButtonInRestoreMode = true;
+                    } else {
+                        previousSoloedTrackIds = [];
+                        toggleGlobalSoloButton.textContent = SOLO_BUTTON_TEXT.CLEAR;
+                        toggleGlobalSoloButton.classList.add('secondary');
+                        toggleGlobalSoloButton.classList.remove('toggled');
+                        isSoloButtonInRestoreMode = false;
+                    }
+                } else {
+                    if (previousSoloedTrackIds.length > 0) {
+                        tracks.forEach(track => {
+                            track.isSoloed = previousSoloedTrackIds.includes(track.id);
+                        });
+                    } else {
+                        tracks.forEach(track => { track.isSoloed = false; });
+                    }
+                    toggleGlobalSoloButton.textContent = SOLO_BUTTON_TEXT.CLEAR;
+                    toggleGlobalSoloButton.classList.add('secondary');
+                    toggleGlobalSoloButton.classList.remove('toggled');
+                    isSoloButtonInRestoreMode = false;
+                }
+                updateAllTrackVisualsAndVolumes();
+                saveSession();
+            });
+
+            toggleGlobalMuteButton.addEventListener('click', () => {
+                if (!audioContext) initAudioContext();
+                if (!isMuteButtonInRestoreMode) {
+                    const currentMuted = tracks.filter(t => t.isMuted).map(t => t.id);
+                    if (currentMuted.length > 0) {
+                        previousMutedTrackIds = [...currentMuted];
+                        tracks.forEach(track => { track.isMuted = false; });
+                        toggleGlobalMuteButton.textContent = MUTE_BUTTON_TEXT.RESTORE;
+                        toggleGlobalMuteButton.classList.remove('secondary');
+                        toggleGlobalMuteButton.classList.add('toggled');
+                        isMuteButtonInRestoreMode = true;
+                    } else {
+                        previousMutedTrackIds = [];
+                        toggleGlobalMuteButton.textContent = MUTE_BUTTON_TEXT.CLEAR;
+                        toggleGlobalMuteButton.classList.add('secondary');
+                        toggleGlobalMuteButton.classList.remove('toggled');
+                        isMuteButtonInRestoreMode = false;
+                    }
+                } else {
+                     if (previousMutedTrackIds.length > 0) {
+                        tracks.forEach(track => {
+                            track.isMuted = previousMutedTrackIds.includes(track.id);
+                        });
+                    } else {
+                        tracks.forEach(track => { track.isMuted = false; });
+                    }
+                    toggleGlobalMuteButton.textContent = MUTE_BUTTON_TEXT.CLEAR;
+                    toggleGlobalMuteButton.classList.add('secondary');
+                    toggleGlobalMuteButton.classList.remove('toggled');
+                    isMuteButtonInRestoreMode = false;
+                }
+                updateAllTrackVisualsAndVolumes();
+                saveSession();
+            });
+
+
+            function setTrackVolume(trackId, volumeValue) {
+                if (!audioContext) initAudioContext(); const track = findTrackById(trackId);
+                if (!track) return; track.volume = volumeValue;
+                applyEffectiveVolume(track.id); saveSession();
+            }
+
+            function updateAllTrackVisualsAndVolumes() {
+                const anySoloActive = tracks.some(t => t.isSoloed);
+                tracks.forEach(track => {
+                    applyEffectiveVolume(track.id, anySoloActive);
+                    track.muteButton.classList.toggle('muted', track.isMuted);
+                    track.soloButton.classList.toggle('soloed', track.isSoloed);
+                    track.element.classList.toggle('muted-by-solo', anySoloActive && !track.isSoloed && !track.isMuted);
+                    track.element.classList.toggle('soloed', track.isSoloed);
+                });
+            }
+
+            function applyEffectiveVolume(trackId, anySoloActiveGlobal = tracks.some(t => t.isSoloed), gainNodeToUse = null) {
+                const track = findTrackById(trackId);
+                if (!track) return;
+
+                const targetGainNode = gainNodeToUse || track.gainNode;
+                if (!targetGainNode) return;
+
+                let newGainValue = 0;
+                if (track.isMuted) {
+                    newGainValue = 0;
+                } else if (anySoloActiveGlobal) {
+                    newGainValue = track.isSoloed ? track.volume : 0;
+                } else {
+                    newGainValue = track.volume;
+                }
+
+                if (targetGainNode.context instanceof OfflineAudioContext) {
+                    targetGainNode.gain.value = newGainValue;
+                } else if (audioContext) {
+                    targetGainNode.gain.setValueAtTime(newGainValue, audioContext.currentTime);
+                }
+            }
+
+
+            loadFilesButton.addEventListener('click', () => fileInputGlobal.click());
+            fileInputGlobal.addEventListener('change', handleMultipleFileLoad);
+
+            async function handleMultipleFileLoad(event) {
+                initAudioContext(); 
+                const files = event.target.files; 
+                if (!files.length) return;
+
+                loadingMessage.textContent = "";
+                loadingOverlay.classList.add('visible');
+                loadingPercentage.textContent = '0%';
+                
+                let filesProcessed = 0;
+                const totalFiles = files.length;
+
+                for (const file of files) {
+                    try {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                        createAndAddTrackElement({fileName: file.name, audioBuffer: audioBuffer, sourceType: 'local'});
+                        filesProcessed++;
+                    } catch (err) { 
+                        console.error(`Error decodificando ${file.name}:`, err); 
+                        // No mostrar error en projectMessage ya que fue eliminado
+                    }
+                    const percentage = Math.round((filesProcessed / totalFiles) * 100);
+                    loadingPercentage.textContent = `${percentage}%`;
+                    await new Promise(resolve => requestAnimationFrame(resolve));
+                }
+                
+                loadingOverlay.classList.remove('visible');
+                loadingMessage.textContent = `${filesProcessed} pista(s) local(es) cargada(s).`;
+                setTimeout(() => { loadingMessage.textContent = ""; }, 4000);
+
+                if (tracks.length === 0) {
+                    tracksContainerPlaceholder.style.display = 'block';
+                    exportMixButton.disabled = true;
+                } else {
+                    tracksContainerPlaceholder.style.display = 'none';
+                    exportMixButton.disabled = false;
+                }
+                saveSession(); fileInputGlobal.value = null;
+            }
+
+            masterVolumeSlider.addEventListener('input', (event) => {
+                if (!audioContext) initAudioContext(); const newVolume = parseFloat(event.target.value);
+                if (masterGainNode) masterGainNode.gain.setValueAtTime(newVolume, audioContext.currentTime);
+                saveSession();
+            });
+            globalPlayPauseButton.addEventListener('click', () => { initAudioContext(); isPlaying ? pauseAll() : playAll(); });
+            function playAll() {
+                if (isPlaying || !tracks.some(t => t.audioBuffer)) return;
+                const currentTime = audioContext.currentTime;
+                if (globalPauseOffset >= maxDuration && maxDuration > 0) globalPauseOffset = 0;
+                tracks.forEach(track => {
+                    if (track.audioBuffer && track.gainNode) {
+                        track.sourceNode = audioContext.createBufferSource(); track.sourceNode.buffer = track.audioBuffer;
+                        track.sourceNode.connect(track.gainNode); let trackOffset = globalPauseOffset;
+                        if (trackOffset >= track.duration && track.duration > 0) return;
+                        track.sourceNode.start(currentTime, trackOffset);
+                    }
+                });
+                globalStartTime = currentTime - globalPauseOffset; isPlaying = true;
+                globalPlayPauseButton.textContent = '❚❚ Pause'; globalPlayPauseButton.classList.add('playing');
+                if (metronome.isActive) startMetronomePlayback();
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                animationFrameId = requestAnimationFrame(updateUI);
+            }
+            function pauseAll() {
+                if (!isPlaying) return;
+                tracks.forEach(track => {
+                    if (track.sourceNode) { try { track.sourceNode.stop(); } catch (e) {}
+                        track.sourceNode.disconnect(); track.sourceNode = null; }
+                });
+                if (audioContext) globalPauseOffset = audioContext.currentTime - globalStartTime;
+                isPlaying = false; globalPlayPauseButton.textContent = '▶️ Play'; globalPlayPauseButton.classList.remove('playing');
+                if (metronome.isActive) stopMetronomePlayback();
+                if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+                updateUI();
+            }
+            globalScrubber.addEventListener('input', handleScrub);
+            globalScrubber.addEventListener('change', () => saveSession());
+            function handleScrub(event) {
+                if (!audioContext) return; const seekTime = parseFloat(event.target.value);
+                if (isPlaying) { pauseAll(); globalPauseOffset = seekTime; playAll(); }
+                else { globalPauseOffset = seekTime; globalStartTime = (audioContext ? audioContext.currentTime : 0) - globalPauseOffset; updateUI(); }
+            }
+            function updateUI() {
+                if (!audioContext) { if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = null; return; }
+                let currentElapsedTime = isPlaying ? audioContext.currentTime - globalStartTime : globalPauseOffset;
+                currentElapsedTime = Math.max(0, currentElapsedTime);
+                if (maxDuration > 0) {
+                    globalScrubber.value = currentElapsedTime;
+                    globalTimeDisplay.textContent = `${formatTime(currentElapsedTime)} / ${formatTime(maxDuration)}`;
+                } else { globalTimeDisplay.textContent = `00:00 / 00:00`; globalScrubber.value = 0; }
+                tracks.forEach(track => {
+                    if (track.audioBuffer && track.duration > 0) {
+                        const progress = Math.min(currentElapsedTime / track.duration, 1);
+                        track.progressBarFill.style.width = `${Math.min(100, Math.max(0, progress * 100))}%`;
+                    } else { track.progressBarFill.style.width = `0%`; }
+                });
+                if (isPlaying && maxDuration > 0 && currentElapsedTime >= maxDuration) {
+                    pauseAll(); globalPauseOffset = maxDuration; globalScrubber.value = maxDuration;
+                }
+                if (isPlaying) animationFrameId = requestAnimationFrame(updateUI);
+            }
+            function updateMaxDurationAndScrubber() {
+                maxDuration = tracks.reduce((max, track) => (track.audioBuffer && track.duration) ? Math.max(max, track.duration) : max, 0);
+                if (maxDuration > 0) { globalScrubber.max = maxDuration; globalScrubber.disabled = false; }
+                else { globalScrubber.max = 100; globalScrubber.disabled = true; globalScrubber.value = 0; }
+                globalPauseOffset = Math.min(globalPauseOffset, maxDuration);
+                updateUI();
+            }
+            function formatTime(seconds) { const min = Math.floor(seconds / 60); const sec = Math.floor(seconds % 60); return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`; }
+
+            metronomeToggleButton.addEventListener('click', () => {
+                initAudioContext(); metronome.isActive = !metronome.isActive;
+                if (metronome.isActive) { metronomeToggleButton.textContent = '🔊 Click ON'; metronomeToggleButton.classList.add('active'); metronomeToggleButton.classList.remove('inactive'); if (isPlaying) startMetronomePlayback(); }
+                else { metronomeToggleButton.textContent = '🔇 Click OFF'; metronomeToggleButton.classList.remove('active'); metronomeToggleButton.classList.add('inactive'); stopMetronomePlayback(); }
+                saveSession();
+            });
+            tempoInput.addEventListener('input', () => {
+                let newTempo = parseInt(tempoInput.value); if (isNaN(newTempo) || newTempo < 60) newTempo = 60; if (newTempo > 180) newTempo = 180;
+                metronome.bpm = newTempo; if (metronome.isActive && isPlaying) { stopMetronomePlayback(); startMetronomePlayback(); }
+                clearTimeout(metronome.saveTempoTimeout); metronome.saveTempoTimeout = setTimeout(saveSession, 500);
+            });
+            timeSignatureSelect.addEventListener('change', () => {
+                const [num, den] = timeSignatureSelect.value.split('/').map(Number); metronome.timeSignature = [num, den];
+                if (metronome.isActive && isPlaying) { stopMetronomePlayback(); startMetronomePlayback(); } saveSession();
+            });
+            clickSoundSelect.addEventListener('change', () => { metronome.soundType = clickSoundSelect.value; saveSession(); });
+            metronomeVolumeSlider.addEventListener('input', () => {
+                metronome.volume = parseFloat(metronomeVolumeSlider.value);
+                if (metronome.gainNode) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime); saveSession();
+            });
+
+            function metronomeScheduler() {
+                while (metronome.nextNoteTime < audioContext.currentTime + metronome.scheduleAheadTime) {
+                    playMetronomeClick(metronome.nextNoteTime, audioContext, metronome.gainNode);
+                    advanceMetronomeNote();
+                }
+                metronome.schedulerTimerId = setTimeout(metronomeScheduler, metronome.lookahead);
+            }
+
+            function advanceMetronomeNote() {
+                const secondsPerBeat = 60.0 / metronome.bpm;
+                metronome.nextNoteTime += secondsPerBeat;
+                metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % metronome.timeSignature[0];
+            }
+
+            function playMetronomeClick(time, context, gain) {
+                if (!gain) return;
+                const osc = context.createOscillator();
+                const clickSoundParams = metronome.clickSounds[metronome.soundType];
+                osc.connect(gain);
+                osc.frequency.setValueAtTime(metronome.currentBeatInBar === 0 ? clickSoundParams.freq1 : clickSoundParams.freq2, time);
+                osc.type = clickSoundParams.type;
+                osc.start(time);
+                osc.stop(time + clickSoundParams.decay);
+            }
+
+            function startMetronomePlayback(offlineCtx = null, offlineRenderDuration = 0) {
+                const currentCtx = offlineCtx || audioContext;
+                const currentGlobalStartTime = offlineCtx ? 0 : globalStartTime;
+
+                if (!metronome.isActive || !currentCtx) return;
+                if (!offlineCtx) {
+                     if (metronome.isPlayingInternal) return;
+                     metronome.isPlayingInternal = true;
+                }
+
+                let beatCounterForOffline = 0;
+                metronome.currentBeatInBar = 0;
+                const secondsPerBeat = 60.0 / metronome.bpm;
+
+                if (offlineCtx) {
+                    let scheduledTime = 0;
+                    const metronomeOfflineGain = offlineCtx.createGain();
+                    metronomeOfflineGain.gain.value = metronome.volume;
+                    metronomeOfflineGain.connect(offlineCtx.destination);
+
+                    while (scheduledTime < offlineRenderDuration) {
+                        const isFirstBeatOffline = (beatCounterForOffline % metronome.timeSignature[0]) === 0;
+                        const osc = offlineCtx.createOscillator();
+                        const clickSoundParams = metronome.clickSounds[metronome.soundType];
+                        osc.connect(metronomeOfflineGain);
+                        osc.frequency.setValueAtTime(isFirstBeatOffline ? clickSoundParams.freq1 : clickSoundParams.freq2, scheduledTime);
+                        osc.type = clickSoundParams.type;
+                        osc.start(scheduledTime);
+                        osc.stop(scheduledTime + clickSoundParams.decay);
+
+                        scheduledTime += secondsPerBeat;
+                        beatCounterForOffline++;
+                    }
+                } else {
+                    const elapsedTime = currentCtx.currentTime - currentGlobalStartTime;
+                    const currentBeatPosition = elapsedTime / secondsPerBeat;
+                    metronome.currentBeatInBar = Math.floor(currentBeatPosition) % metronome.timeSignature[0];
+                    metronome.nextNoteTime = currentGlobalStartTime + (Math.ceil(currentBeatPosition) * secondsPerBeat);
+                    if (metronome.nextNoteTime < currentCtx.currentTime) {
+                        metronome.nextNoteTime += secondsPerBeat;
+                        metronome.currentBeatInBar = (metronome.currentBeatInBar + 1) % metronome.timeSignature[0];
+                    }
+                    metronomeScheduler();
+                }
+            }
+
+
+            function stopMetronomePlayback() {
+                clearTimeout(metronome.schedulerTimerId);
+                metronome.schedulerTimerId = null;
+                metronome.isPlayingInternal = false;
+            }
+
+            exportMixButton.addEventListener('click', async () => {
+                if (!tracks.length || maxDuration === 0) {
+                    exportMessage.textContent = "No hay audio para exportar.";
+                    return;
+                }
+                if (!audioContext) initAudioContext();
+
+                const format = exportFormatSelect.value;
+                exportMessage.textContent = `Exportando como ${format.toUpperCase()}...`;
+                exportMixButton.disabled = true;
+                exportProgressContainer.style.display = 'block';
+                exportProgressBar.style.width = '0%';
+
+                try {
+                    const sampleRate = audioContext.sampleRate;
+                    const numberOfChannels = audioContext.destination.channelCount > 0 ? audioContext.destination.channelCount : 2;
+                    const offlineCtx = new OfflineAudioContext(numberOfChannels, Math.ceil(sampleRate * maxDuration), sampleRate);
+
+
+                    const offlineMasterGain = offlineCtx.createGain();
+                    offlineMasterGain.gain.value = parseFloat(masterVolumeSlider.value);
+                    offlineMasterGain.connect(offlineCtx.destination);
+
+                    const anySoloActive = tracks.some(t => t.isSoloed);
+
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    exportProgressBar.style.width = '10%';
+
+                    for (let i = 0; i < tracks.length; i++) {
+                        const track = tracks[i];
+                        if (track.audioBuffer) {
+                            const source = offlineCtx.createBufferSource();
+                            source.buffer = track.audioBuffer;
+                            const trackGain = offlineCtx.createGain();
+                            applyEffectiveVolume(track.id, anySoloActive, trackGain);
+                            source.connect(trackGain);
+                            trackGain.connect(offlineMasterGain);
+                            source.start(0);
+                        }
+                        exportProgressBar.style.width = `${10 + Math.floor((i / tracks.length) * 60)}%`;
+                    }
+
+                    if (metronome.isActive) {
+                        startMetronomePlayback(offlineCtx, maxDuration);
+                    }
+                    exportProgressBar.style.width = '70%';
+
+                    const renderedBuffer = await offlineCtx.startRendering();
+                    exportProgressBar.style.width = '90%';
+
+                    if (format === 'wav') {
+                        const wavBlob = audioBufferToWav(renderedBuffer);
+                        downloadBlob(wavBlob, `TZU-Worship-Mezcla_${Date.now()}.wav`);
+                        exportMessage.textContent = "Exportación WAV completada.";
+                    } else if (format === 'mp3') {
+                        exportMessage.textContent = "Formato MP3 no implementado aún.";
+                    }
+                    exportProgressBar.style.width = '100%';
+
+                } catch (err) {
+                    console.error("Error durante la exportación:", err);
+                    exportMessage.textContent = "Error en la exportación.";
+                    exportProgressBar.style.width = '0%';
+                } finally {
+                    exportMixButton.disabled = false;
+                    setTimeout(() => {
+                         exportProgressContainer.style.display = 'none';
+                         exportProgressBar.style.width = '0%';
+                         exportMessage.textContent = "";
+                    }, 4000);
+                }
+            });
+
+            function audioBufferToWav(buffer) {
+                let numOfChan = buffer.numberOfChannels,
+                    dataLength = buffer.length * numOfChan * 2,
+                    btwLength = dataLength + 44,
+                    btwArrBuff = new ArrayBuffer(btwLength),
+                    btwView = new DataView(btwArrBuff),
+                    btwChnls = [],
+                    btwIndex,
+                    btwSample,
+                    btwOffset = 0,
+                    headerPos = 0;
+
+                setUint32(0x46464952); 
+                setUint32(btwLength - 8); 
+                setUint32(0x45564157); 
+                setUint32(0x20746d66); 
+                setUint32(16); 
+                setUint16(1); 
+                setUint16(numOfChan);
+                setUint32(buffer.sampleRate);
+                setUint32(buffer.sampleRate * numOfChan * 2); 
+                setUint16(numOfChan * 2); 
+                setUint16(16); 
+                setUint32(0x61746164); 
+                setUint32(dataLength); 
+
+                for (btwIndex = 0; btwIndex < buffer.numberOfChannels; btwIndex++)
+                    btwChnls.push(buffer.getChannelData(btwIndex));
+
+                let dataPos = 44; 
+                for (btwOffset = 0; btwOffset < buffer.length; btwOffset++) {
+                    for (btwIndex = 0; btwIndex < numOfChan; btwIndex++) {
+                        btwSample = Math.max(-1, Math.min(1, btwChnls[btwIndex][btwOffset]));
+                        btwSample = (0.5 + btwSample < 0 ? btwSample * 32768 : btwSample * 32767) | 0;
+                        btwView.setInt16(dataPos, btwSample, true);
+                        dataPos += 2;
+                    }
+                }
+                return new Blob([btwView], { type: "audio/wav" });
+
+                function setUint16(data) {
+                    btwView.setUint16(headerPos, data, true);
+                    headerPos += 2;
+                }
+                function setUint32(data) {
+                    btwView.setUint32(headerPos, data, true);
+                    headerPos += 4;
+                }
+            }
+
+            function downloadBlob(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                document.body.appendChild(a);
+                a.style = "display: none";
+                a.href = url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+
+            function getSessionDataForSave() { // No longer saves project-specific file info
+                 return {
+                    version: "1.3.9-no-project-save",
+                    tracks: tracks.map(t => ({ // Still save track settings
+                        volume: t.volume, isMuted: t.isMuted, isSoloed: t.isSoloed,
+                        // Keep loadedFileName/fileUrl for potential re-load from URL or to show name
+                        loadedFileName: t.loadedFileName, 
+                        fileUrl: t.fileUrl, 
+                        sourceType: t.sourceType 
+                    })),
+                    metronome: { bpm: metronome.bpm, timeSignature: timeSignatureSelect.value, isActive: metronome.isActive, soundType: metronome.soundType, volume: metronome.volume },
+                    masterVolume: parseFloat(masterVolumeSlider.value),
+                    globalScrubberValue: parseFloat(globalScrubber.value) || 0
+                };
+            }
+            // saveProjectToFile y loadProjectFromFile ELIMINADAS
+
+            function resetGlobalToggleButtonsToDefaults() {
+                isSoloButtonInRestoreMode = false;
+                toggleGlobalSoloButton.textContent = SOLO_BUTTON_TEXT.CLEAR;
+                toggleGlobalSoloButton.classList.add('secondary');
+                toggleGlobalSoloButton.classList.remove('toggled');
+                previousSoloedTrackIds = [];
+
+                isMuteButtonInRestoreMode = false;
+                toggleGlobalMuteButton.textContent = MUTE_BUTTON_TEXT.CLEAR;
+                toggleGlobalMuteButton.classList.add('secondary');
+                toggleGlobalMuteButton.classList.remove('toggled');
+                previousMutedTrackIds = [];
+            }
+            
+            const LS_KEY = 'multipistaAdvancedSession_v1.3.9'; // Actualizar versión
+            function saveSession() {
+                if (typeof localStorage === 'undefined') return; const sessionData = getSessionDataForSave();
+                try { localStorage.setItem(LS_KEY, JSON.stringify(sessionData)); }
+                catch (e) { console.warn("No se pudo guardar la sesión en LS:", e); }
+            }
+            async function loadSession() { // Esta función ahora carga la sesión, no un "proyecto"
+                if (typeof localStorage === 'undefined') return;
+                try {
+                    const savedSession = localStorage.getItem(LS_KEY);
+                    if (savedSession) {
+                        const data = JSON.parse(savedSession);
+                        await applyLoadedData(data); // applyLoadedData sigue siendo relevante
+                        resetGlobalToggleButtonsToDefaults();
+                        console.log("Sesión anterior cargada desde LocalStorage.");
+                        // projectMessage.textContent = "Sesión anterior cargada..."; // Ya no existe projectMessage
+                        loadingMessage.textContent = "Sesión anterior cargada."; // Usar loadingMessage en su lugar
+                         setTimeout(() => loadingMessage.textContent = "", 6000);
+                    }
+                } catch (e) { console.warn("No se pudo cargar la sesión desde LS:", e); localStorage.removeItem(LS_KEY); }
+            }
+
+
+            async function applyLoadedData(data) { // Esta función ahora es para la sesión de localStorage
+                initAudioContext();
+                tracksContainer.innerHTML = ''; tracks = []; nextTrackId = 0; maxDuration = 0;
+                tracksContainerPlaceholder.style.display = 'block';
+                exportMixButton.disabled = true;
+
+                if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
+                    for (const trackData of data.tracks) {
+                        let trackFileName = trackData.loadedFileName || trackData.fileUrl?.substring(trackData.fileUrl.lastIndexOf('/') + 1).split('?')[0] || "Pista Desconocida";
+                        if (trackFileName.length > 50) trackFileName = trackFileName.substring(0,47) + "...";
+
+                        let newTrackArgs = {
+                            fileName: trackFileName, audioBuffer: null,
+                            fileUrl: trackData.fileUrl,
+                            sourceType: trackData.sourceType || (trackData.fileUrl ? 'url' : 'project-placeholder'),
+                            existingTrackData: trackData
+                        };
+
+                        const trackObject = createAndAddTrackElement(newTrackArgs);
+
+                        if (trackData.fileUrl && trackObject.sourceType === 'url') {
+                            updateTrackStatusIndicator(trackObject.id, "Cargando URL...");
+                            try {
+                                const response = await fetch(trackData.fileUrl);
+                                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                                const arrayBuffer = await response.arrayBuffer();
+                                const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+                                trackObject.audioBuffer = audioBuffer;
+                                trackObject.duration = audioBuffer.duration;
+                                updateTrackStatusIndicator(trackObject.id, "URL Cargada OK");
+                            } catch (err) {
+                                console.error(`Error cargando desde URL ${trackData.fileUrl}:`, err);
+                                updateTrackStatusIndicator(trackObject.id, `Error URL`, true);
+                            }
+                        } else if (trackObject.sourceType === 'project-placeholder' && trackData.loadedFileName) {
+                           updateTrackStatusIndicator(trackObject.id, "Recargar localmente");
+                        } else if (trackObject.sourceType === 'local' && trackData.loadedFileName){
+                            updateTrackStatusIndicator(trackObject.id, "Recargar localmente");
+                        }
+                    }
+                     exportMixButton.disabled = false;
+                } else {
+                    tracksContainerPlaceholder.style.display = 'block';
+                    exportMixButton.disabled = true;
+                }
+
+
+                tempoInput.value = data.metronome.bpm; metronome.bpm = data.metronome.bpm;
+                timeSignatureSelect.value = data.metronome.timeSignature;
+                const [num, den] = data.metronome.timeSignature.split('/').map(Number); metronome.timeSignature = [num, den];
+                clickSoundSelect.value = data.metronome.soundType; metronome.soundType = data.metronome.soundType;
+                metronomeVolumeSlider.value = data.metronome.volume; metronome.volume = data.metronome.volume;
+                if(metronome.gainNode) metronome.gainNode.gain.setValueAtTime(metronome.volume, audioContext.currentTime);
+
+                const currentMetronomeActive = metronome.isActive;
+                if (data.metronome.isActive && !currentMetronomeActive) {
+                    metronomeToggleButton.click();
+                } else if (!data.metronome.isActive && currentMetronomeActive) {
+                     metronomeToggleButton.click();
+                }
+
+
+                masterVolumeSlider.value = data.masterVolume || 0.8;
+                if (masterGainNode) masterGainNode.gain.setValueAtTime(parseFloat(masterVolumeSlider.value), audioContext.currentTime);
+                globalPauseOffset = data.globalScrubberValue || 0;
+
+                updateAllTrackVisualsAndVolumes();
+                updateMaxDurationAndScrubber();
+                updateUI();
+            }
+
+            (async () => {
+                await loadSession();
+                if (tracks.length === 0) {
+                    tracksContainerPlaceholder.style.display = 'block';
+                    exportMixButton.disabled = true;
+                } else {
+                    exportMixButton.disabled = false;
+                }
+                updateUI();
+            })();
+
+        });
+    </script>
+</body>
+</html>
