@@ -64,7 +64,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TZU Worship - Multipista con Forma de Onda (Generación Optimizada)</title>
+    <title>TZU Worship - Multipista (Debug Carga)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
@@ -553,14 +553,13 @@
             <h2>Gestión de Archivos y Exportación</h2>
             <div class="file-management"> 
                 <input type="file" id="fileInputGlobal" multiple accept=".mp3,.wav">
-                <button id="loadFilesButton">📁 Cargar Stems Locales</button>
+                <button id="loadFilesButton">📁 Cargar Pistas</button>
                 <span id="loadingMessage"></span>
             </div>
             <div class="export-controls">
                 <button id="exportMixButton" disabled>📤 Exportar Mezcla</button>
                 <select id="exportFormatSelect">
                     <option value="wav" selected>WAV</option>
-                    <option value="mp3" disabled>MP3 (Próximamente)</option>
                 </select>
                 <span id="exportMessage"></span>
             </div>
@@ -661,7 +660,7 @@
 
             let mixedAudioBuffer = null; 
             let isScrubbingWaveform = false;
-            let waveformGenerationPending = false; // Flag para controlar la generación de la onda
+            let waveformGenerationPending = false;
 
             let metronome = {
                 isActive: false, isPlayingInternal: false, bpm: 120, 
@@ -687,7 +686,7 @@
                     document.documentElement.removeAttribute('data-theme');
                     themeToggleButton.textContent = '🌙 Modo Oscuro';
                 }
-                if (mixedAudioBuffer || tracks.length === 0) { // Redibujar solo si hay algo que dibujar o para limpiar
+                if (mixedAudioBuffer || tracks.length === 0) { 
                      drawWaveform();
                 }
             }
@@ -804,10 +803,7 @@
                 newTrack.volumeSlider.addEventListener('input', (event) => setTrackVolume(newTrack.id, parseFloat(event.target.value)));
 
                 tracks.push(newTrack);
-                if (audioBuffer) {
-                    // updateMaxDurationAndScrubber será llamado después de que todas las pistas del lote se carguen
-                    // en handleMultipleFileLoad
-                }
+                // No llamar a updateMaxDurationAndScrubber aquí directamente. Se llamará después del lote.
                 updateAllTrackVisualsAndVolumes();
                 return newTrack;
             }
@@ -1027,8 +1023,7 @@
                     exportMixButton.disabled = false;
                 }
                 
-                // Llamar a updateMaxDurationAndScrubber DESPUÉS de que todas las pistas del lote se procesen
-                await updateMaxDurationAndScrubber(); // Esto ahora llamará a regenerateAndDrawWaveform internamente
+                await updateMaxDurationAndScrubber(); 
                 
                 saveSession(); 
                 fileInputGlobal.value = null;
@@ -1072,7 +1067,7 @@
                 updateUI();
             }
             
-            function handleWaveformScrub(event) { // Renombrada desde handleScrub
+            function handleWaveformScrub(event) { 
                 if (!audioContext || maxDuration === 0) return;
                 const rect = waveformCanvas.getBoundingClientRect();
                 const x = event.clientX - rect.left;
@@ -1139,20 +1134,21 @@
             }
             
             async function updateMaxDurationAndScrubber() { 
+                const oldMaxDuration = maxDuration;
                 maxDuration = tracks.reduce((max, track) => (track.audioBuffer && track.duration) ? Math.max(max, track.duration) : max, 0);
                 
-                // Solo regenerar si hay pistas y duración, y si no hay una generación ya pendiente
-                if (maxDuration > 0 && !waveformGenerationPending) { 
-                    waveformGenerationPending = true; // Marcar que una generación está en curso o por iniciar
-                    exportMixButton.disabled = true; // Deshabilitar exportación mientras se genera la onda
+                // Solo regenerar si maxDuration cambió significativamente o si es la primera vez con pistas
+                if ((maxDuration > 0 && maxDuration !== oldMaxDuration && !waveformGenerationPending) || (maxDuration > 0 && !mixedAudioBuffer && !waveformGenerationPending) ) { 
+                    waveformGenerationPending = true; 
+                    exportMixButton.disabled = true; 
                     loadingMessage.textContent = "Generando forma de onda...";
                     
                     await regenerateAndDrawWaveform(); 
                     
                     loadingMessage.textContent = "";
-                    if (tracks.length > 0) exportMixButton.disabled = false; // Habilitar si aún hay pistas
+                    if (tracks.length > 0) exportMixButton.disabled = false; 
                     waveformGenerationPending = false;
-                } else if (maxDuration === 0) {
+                } else if (maxDuration === 0 && oldMaxDuration > 0) { // Si se eliminaron todas las pistas
                     mixedAudioBuffer = null;
                     drawWaveform(); 
                 }
@@ -1385,6 +1381,111 @@
                 metronome.isPlayingInternal = false;
             }
 
+            // --- FUNCIONES DE FORMA DE ONDA (Optimizadas) ---
+            async function generateMixedAudioBuffer() {
+                if (!tracks.length || maxDuration === 0) {
+                    mixedAudioBuffer = null;
+                    return Promise.resolve(); // Devolver una promesa resuelta
+                }
+                if (!audioContext) initAudioContext();
+
+                const targetSampleRate = audioContext.sampleRate;
+                const numberOfChannels = audioContext.destination.channelCount > 0 ? audioContext.destination.channelCount : 2;
+                const offlineCtx = new OfflineAudioContext(numberOfChannels, Math.ceil(targetSampleRate * maxDuration), targetSampleRate);
+                const offlineMasterGain = offlineCtx.createGain();
+                offlineMasterGain.gain.value = 1.0; 
+                offlineMasterGain.connect(offlineCtx.destination);
+
+                // console.log("Generando buffer de mezcla para forma de onda...");
+
+                for (const track of tracks) {
+                    if (track.audioBuffer) { // Solo procesar pistas que ya tienen su AudioBuffer cargado
+                        const source = offlineCtx.createBufferSource();
+                        source.buffer = track.audioBuffer;
+                        const trackGain = offlineCtx.createGain();
+                        trackGain.gain.value = track.volume; 
+                        source.connect(trackGain);
+                        trackGain.connect(offlineMasterGain);
+                        source.start(0);
+                    }
+                }
+                try {
+                    mixedAudioBuffer = await offlineCtx.startRendering();
+                    // console.log("Buffer de mezcla generado.");
+                } catch (err) {
+                    console.error("Error generando buffer de mezcla para forma de onda:", err);
+                    mixedAudioBuffer = null;
+                }
+            }
+
+            function drawWaveform() {
+                if (!waveformCtx) return; 
+                
+                const width = waveformCanvas.width;
+                const height = waveformCanvas.height;
+                waveformCtx.clearRect(0, 0, width, height);
+
+                const waveColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+                
+                if (!mixedAudioBuffer) {
+                    waveformCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+                    waveformCtx.lineWidth = 1;
+                    waveformCtx.beginPath();
+                    waveformCtx.moveTo(0, height / 2);
+                    waveformCtx.lineTo(width, height / 2);
+                    waveformCtx.stroke();
+                    return;
+                }
+                
+                waveformCtx.lineWidth = 1.5; 
+                waveformCtx.strokeStyle = waveColor;
+                waveformCtx.beginPath();
+
+                const data = mixedAudioBuffer.getChannelData(0); 
+                const step = Math.ceil(data.length / width);
+                const amp = height / 2;
+
+                for (let i = 0; i < width; i++) {
+                    let min = 1.0;
+                    let max = -1.0;
+                    for (let j = 0; j < step; j++) {
+                        const datum = data[(i * step) + j];
+                        if (datum === undefined) continue; 
+                        if (datum < min) min = datum;
+                        if (datum > max) max = datum;
+                    }
+                    waveformCtx.moveTo(i + 0.5, (1 + min) * amp); 
+                    waveformCtx.lineTo(i + 0.5, (1 + max) * amp);
+                }
+                waveformCtx.stroke();
+            }
+
+            async function scheduleWaveformGeneration() {
+                if (waveformGenerationPending) return; // Si ya hay una pendiente, no hacer nada
+                
+                waveformGenerationPending = true;
+                // Pequeña demora para agrupar múltiples cambios rápidos (como carga de varias pistas)
+                // y evitar regenerar la onda innecesariamente por cada una.
+                await new Promise(resolve => setTimeout(resolve, 300)); 
+
+                if (tracks.length > 0 && maxDuration > 0) {
+                    const wasExportDisabled = exportMixButton.disabled;
+                    exportMixButton.disabled = true; 
+                    loadingMessage.textContent = "Generando forma de onda...";
+                    
+                    await generateMixedAudioBuffer(); 
+                    drawWaveform();
+                    
+                    loadingMessage.textContent = "";
+                    exportMixButton.disabled = wasExportDisabled; 
+                } else {
+                    mixedAudioBuffer = null;
+                    drawWaveform(); 
+                }
+                waveformGenerationPending = false;
+            }
+            // --- FIN FUNCIONES DE FORMA DE ONDA ---
+
             exportMixButton.addEventListener('click', async () => {
                 if (!tracks.length || maxDuration === 0) {
                     exportMessage.textContent = "No hay audio para exportar.";
@@ -1522,7 +1623,7 @@
             
             function getSessionDataForSave() {
                  return {
-                    version: "1.3.14-waveform-optimized", 
+                    version: "1.3.15-waveform-optimized-generation", 
                     tracks: tracks.map(t => ({ 
                         volume: t.volume, isMuted: t.isMuted, isSoloed: t.isSoloed,
                         loadedFileName: t.loadedFileName, 
@@ -1555,7 +1656,7 @@
                 previousMutedTrackIds = [];
             }
             
-            const LS_KEY = 'multipistaAdvancedSession_v1.3.14'; 
+            const LS_KEY = 'multipistaAdvancedSession_v1.3.15'; 
             function saveSession() {
                 if (typeof localStorage === 'undefined') return; const sessionData = getSessionDataForSave();
                 try { localStorage.setItem(LS_KEY, JSON.stringify(sessionData)); }
@@ -1609,10 +1710,9 @@
                 tracksContainerPlaceholder.style.display = 'block';
                 exportMixButton.disabled = true;
 
+                let tracksToProcessForWaveform = 0;
+
                 if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0) {
-                    let tracksProcessedForWaveform = 0;
-                    const totalTracksForWaveform = data.tracks.filter(t => t.sourceType === 'url' || t.loadedFileName).length;
-                    
                     for (const trackData of data.tracks) {
                         let trackFileName = trackData.loadedFileName || trackData.fileUrl?.substring(trackData.fileUrl.lastIndexOf('/') + 1).split('?')[0] || "Pista Desconocida";
                         if (trackFileName.length > 50) trackFileName = trackFileName.substring(0,47) + "...";
@@ -1637,7 +1737,7 @@
                                 trackObject.audioBuffer = audioBuffer;
                                 trackObject.duration = audioBuffer.duration;
                                 updateTrackStatusIndicator(trackObject.id, "URL Cargada OK");
-                                tracksProcessedForWaveform++;
+                                tracksToProcessForWaveform++; // Contar pistas con buffer para la onda
                             } catch (err) {
                                 console.error(`Error cargando desde URL ${trackData.fileUrl}:`, err);
                                 updateTrackStatusIndicator(trackObject.id, `Error URL`, true);
@@ -1646,22 +1746,16 @@
                            updateTrackStatusIndicator(trackObject.id, "Recargar localmente");
                         } else if (trackObject.sourceType === 'local' && trackData.loadedFileName){
                            updateTrackStatusIndicator(trackObject.id, "Recargar localmente");
-                           // Para locales, asumimos que el audioBuffer no está al cargar sesión,
-                           // así que no se cuenta para tracksProcessedForWaveform aquí.
                         }
-                         // Si es local y se cargó (no desde sesión), createAndAddTrackElement ya lo manejó.
+                         // Si la pista ya tenía un audioBuffer (improbable para sesión local, pero posible)
+                        else if (trackData.audioBuffer) {
+                            tracksToProcessForWaveform++;
+                        }
                     }
                      exportMixButton.disabled = false;
-                     // Si se cargaron algunas pistas (especialmente URLs) desde la sesión,
-                     // ahora sería un buen momento para regenerar la forma de onda.
-                     if (tracksProcessedForWaveform > 0 || (data.tracks.some(t => t.sourceType === 'local' && t.audioBuffer))) { // Si alguna pista local ya tenía buffer (improbable al cargar sesión)
-                        await updateMaxDurationAndScrubber();
-                     }
-
                 } else {
                     tracksContainerPlaceholder.style.display = 'block';
                     exportMixButton.disabled = true;
-                    await updateMaxDurationAndScrubber(); // Para limpiar la onda si no hay pistas
                 }
 
                 if (data.metronome) {
@@ -1722,11 +1816,8 @@
                 globalPauseOffset = data.globalScrubberValue || 0;
 
                 updateAllTrackVisualsAndVolumes();
-                // updateMaxDurationAndScrubber ya se llamó si se cargaron pistas con buffer, 
-                // o se llamará ahora si no se cargaron para limpiar la onda
-                if (!(data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0 && data.tracks.some(t=>t.audioBuffer))) {
-                    await updateMaxDurationAndScrubber(); 
-                }
+                // Llamar a updateMaxDurationAndScrubber DESPUÉS de procesar todas las pistas de la sesión.
+                await updateMaxDurationAndScrubber(); 
                 updateUI(); 
             }
 
@@ -1744,14 +1835,12 @@
                     updateUI(); 
                 });
                 
-                // No cargar sesión automáticamente.
-                // await loadSession(); 
-                // En su lugar, configurar valores iniciales y dibujar onda vacía si es necesario.
+                // await loadSession(); // No cargar sesión automáticamente
+                // En su lugar, inicializar con valores por defecto y dibujar onda vacía.
                 if (tracks.length === 0) {
                     tracksContainerPlaceholder.style.display = 'block';
                     exportMixButton.disabled = true;
                     progressCursor.style.left = '0%';
-                    drawWaveform(); // Dibujar canvas vacío
                 }
                 
                 const initialTimeSigParts = timeSignatureInput.value.trim().split('/');
@@ -1767,6 +1856,8 @@
                 metronome.bpm = parseInt(tempoInput.value);
                 metronome.soundType = clickSoundSelect.value; 
                 metronome.volume = parseFloat(metronomeVolumeSlider.value);
+
+                drawWaveform(); // Dibujar canvas (probablemente vacío al inicio)
 
                 resetGlobalToggleButtonsToDefaults();
                 updateUI();
